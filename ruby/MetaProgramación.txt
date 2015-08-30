@@ -1,0 +1,166 @@
+MetaProgramación:
+	Introspection: Analisis del objeto a nivel de objetos.
+	Self Modification: Modificar métodos dinámicamente.
+	Intersectión: Cambiar el comportamiento del lenguaje.
+
+APIs de MetaProg. de Ruby:
+	.class
+		.class.superclass
+	.method
+		:poder_ofensivo -> simbolo, osea, solo un string
+		m2 = atila.method(:poder_ofensivo)
+		m2.parameters
+			=> [[:req, _:un_defensor]]
+		m2.owner
+		 => atacante (Porque está definido en el mixin atacante)
+		atila.send(m.name) == m.call
+		Guerrero.instance_methods
+			Te da todos los métodos de instancia, si le pasas false, no te da toda la jerarquia
+		u = Guerrero.instance_method(:poder_ofensivo)
+			>Unbound Method. <- Es de la instancia, no de la instancia de Clase
+		u.bind(atila)
+			Te lo bindea a atila
+			.send() permite realizar el method lookup en cualquier instancia
+			ya que el .method te devuelve el método bindeado a una instancia o unbounded y necesita
+			ser bindeado para poder usar .call
+			u.bind(Muralla.new) //El u es el metodo poder_ofensivo del atacante
+				TypeError -> bind argument must be an instance of Guerrero
+			-Que el bind te lo deje bindeado a uno solo es tema de ruby.
+			-Que te ejecute o no el metodo en un objeto que no sea especificamente de esa instancia es tema de ruby :P.
+		atila.instance_variable_get(@potencial_ofensivo)
+			Si no encuentra el attr te tira nil
+			No produce un efecto colateral :P
+		atila.instance_variable_set(@potencial_ofensivo, 1)
+	Instanciar Clases
+		una_clase = Class.new
+		otra_clase = Class.new <- La Palabra de las clases están adentro de un diccionario para poderla acceder de cualquier lado
+			def asd
+				123
+			end
+		end
+		bleh = otra_clase.new
+		bleh.asd
+			123
+		Object.const_set(:otra_clase, otra_clase)
+			NO
+			Object.const_set(:Otra_clase, otra_clase)
+				:D
+		Redefinamos String!
+			class String
+				def importante
+					self + "importante"
+				end
+			end
+			-> si importante estaba lo acabamos de pisar
+		1.class
+		 => Fix num
+		class Fixnum
+			def + (x)
+				123
+			end
+		end
+		 => 1 + 1 =123 :D
+	Rompamos los métodos privados
+		klass.attr_accessor :magia
+			=>NoMethodError.....y despues tira private method, beh.
+		klass.send(:attr_accessor, :magia)
+			=>Me acabo de cagar en los privados
+	¿Porque poner una estructura si me das formas de romperlo?
+		Para que labures tranca como siempre y si necesitas, los usas, pero la idea es NO usarlos al pedo, porque poder romper todo.
+		El reflection te deja romper todo, cagarte en todo, romper los contratos y perder lo que los contratos proponian
+		Un ejemplo de programas que piensan programas....son los autocompletar, como el del pry x ejemplo.
+	klass.send(:define_method, :asd) { 123 }
+		klass.new.asd
+			123
+	A.private_instance_methods(false)
+		[:metodo2]
+	m = A.instance_method.method(:metodo2)
+		class A
+			def metodo2b
+				A.instance_method(:metodo2).bind(self).call
+			end
+		end
+	m.new.metodo2b // :D
+==========================================================================================================================================
+Peloton.cobarde([])
+Peloton.class
+	=> Class
+Peloton.class.instance_method(:cobarde)
+	=> undefined for `Class`
+Peloton.singleton_class
+	=>#<Class:Peloton>
+atila = Guerrero.new
+atila.singleton_class.send(:define_method, :grita) { 'aaaaaahhh!'}
+atila.gritar
+	=> 'aaaaaaaahhh!'
+Guerrero.grita
+	=>ERROR
+atila.singleton_class.superclass
+	Guerrero
+Se agrega un nivel más intermedio que empieza en la singleton class y despues hacia la clase posta, para asi poder redefinir en el propio
+objeto.
+ => Gráfico loco con explicacion inentendible de como hace el metodo lookup con el metamodelo de smalltalk :S
+ => Gráfico loco con explicacion entendible de como hace el metodo lookup con el metamodelo de roby :D
+...ruby me deja hacer atila.singleton_class.new? singleton_class es la clase del objeto, porque ruby se le canto el culo (Esta clase en el middle) y te contesta que NO, te dice TypeError que no se puede instanciar una singleton_class. Ruby puede pero no te deja...
+El "No podes" significa "No podes...pero por favor no me rompas".
+atila.send(:define_singleton_method, _singleton_class) { 'hola' }
+	atila.singleton_class
+		'hola'
+	atila.potencial_ofensivo
+		50
+	JA! No rompio..pero no traten como __singleton_class__, je
+
+	Regla 1: Siempre conocer el metamodelo, si bien puede funcar, necesitas que tambien las cosas de otros funquen..osea, no jodas.
+	Regla 2: Ser cuidadoso en todo lo que se hace con el metamodelo.
+
+class Object
+	def __send__
+		true
+	end
+end
+....Y PUM, ROMPE TODO, INCLUSO EL PUTO PRY! Abrimos la clase Object y rompimos todo :DD
+
+Espadachin.singleton_class
+	#Espadachin
+Espadachin.singleton_class.superclass
+	#Guerrero
+Guerrero.singleton_class.superclass
+	#Object
+Object.singleton_class.superclass
+	#BasicObject
+BasicObject.singleton_class.superclass
+	Class
+BasicObject.superclass
+	nill
+Class.superclass
+	Module
+Module.superclass
+	Object
+Module.class
+	Class
+Module.singleton_class.superclass
+	Object
+
+Todo objeto tiene una autoclave
+Toda autoclase tiene como superclase la autoclase de la clase del objecto
+Salvo BasicObject cuya autoclase tiene como autoclavse a class y tiene como superclase a nil
+
+Class.singleton_class.class
+	Class......DA VUELTAS Y LA CONCHA DE TODOOOOO
+atila.singleton_class.ancestors
+	[#Guerrero
+	Guerrero,
+	Defensor,
+	Atacante,
+	Object,
+	========Esto ya es del pry=====
+	PP::ObjectMixin, <-PrettyPrint :P
+	Kernel,
+	BasicObject]
+Defensor.singleton_class.ancestors
+	[#Defensor.
+	Module
+	Object,
+	PP::ObjectMixin,
+	Kernel,
+	BasicObject]
