@@ -10,15 +10,18 @@ describe 'Aspect tests' do
     module MiModulo
 
     end
-    miObjeto =  MiClase.new
+    miObjeto = MiClase.new
 
     aspect = Aspects.new
-    expect(aspect.on(MiClase, miObjeto, MiModulo)).to eq("Me pasaste MiClase, #{miObjeto} y MiModulo")
+    expect(aspect.on(MiClase, miObjeto, MiModulo) { 'hola!' }).to eq("Me pasaste MiClase, #{miObjeto}, MiModulo y hola!")
   end
 
-  it 'falla por falta de parametros' do
+  it 'falla por no pasarle un bloque' do
+    class MiClase
+
+    end
     aspect = Aspects.new
-    expect { aspect.on('hola') }.to raise_error(ArgumentError) #, 'wrong number of arguments (0 for +1)')
+    expect { aspect.on(MiClase) }.to raise_error(ArgumentError, 'wrong number of arguments (0 for +1)')
   end
 
 
