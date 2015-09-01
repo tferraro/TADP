@@ -4,8 +4,16 @@ require_relative '../src/aspects'
 describe 'Aspect tests' do
 
   it 'chequear parametros pasados' do
+    class MiClase
+
+    end
+    module MiModulo
+
+    end
+    miObjeto =  MiClase.new
+
     aspect = Aspects.new
-    expect(aspect.on('hola', 'tarolas', '0')).to eq('Me pasaste hola, tarolas y 0')
+    expect(aspect.on(MiClase, miObjeto, MiModulo)).to eq("Me pasaste MiClase, #{miObjeto} y MiModulo")
   end
 
   it 'falla por falta de parametros' do
