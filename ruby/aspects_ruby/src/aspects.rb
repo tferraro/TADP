@@ -17,13 +17,6 @@ class Aspects
     objetos - regexs + origenes_regex
   end
 
-  def origen_exists?(regex)
-    Module.constants.any? do |constante|
-      !regex.match(constante).nil?
-    end
-  end
-
-
   #Prueba de define_method, no tiene importancia
   [Class, Module, Object].each do |origen|
     define_method("#{origen}_exists?".downcase) do |nombre|
@@ -41,7 +34,6 @@ class Module
   def _get_symbol_by_regex(regex)
     self.constants.select { |c| regex.match(c) }
   end
-
 
   def get_origin_by_regex(regex)
     self._get_symbol_by_regex(regex).map { |symbol| self.const_get(symbol) }
