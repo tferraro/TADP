@@ -1,6 +1,30 @@
 require 'rspec'
 require_relative '../src/aspects'
 
+describe 'Aspect condiciones' do
+
+  before(:each) do
+    class MiClase
+      def self.foo
+
+      end
+
+      def self.bar
+
+      end
+    end
+  end
+
+  it 'probar condiciones de visibilidad is_public y name' do
+    expect(
+        Aspects.on(MiClase) do |hey|
+          where name(/bar/), is_public, hey
+
+        end).to eq('Me pasaste MiClase y [:bar]')
+  end
+end
+
+
 describe 'Aspect origenes' do
 
   before(:each) do
@@ -10,10 +34,6 @@ describe 'Aspect origenes' do
     module MiModulo
 
     end
-  end
-
-  it 'prueba' do
-    expect(Aspects.on(MiClase) { where }).to eq('Me pasaste MiClase y holis')
   end
 
   it 'chequear parametros pasados' do

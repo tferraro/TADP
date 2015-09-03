@@ -1,7 +1,10 @@
 class Aspects
   def Aspects.on(*objetos, &condicion)
     origenes = validar_argumentos(objetos, condicion)
-    "Me pasaste #{origenes.join(', ')} y #{condicion.call}"
+    condicion.call origenes
+    condicion.inspect
+    # Para chequear con los tests
+    "Me pasaste #{origenes.join(', ')} y #{condicion.call origenes}"
   end
 
   def self.validar_argumentos(objetos, condicion)
@@ -42,11 +45,27 @@ class Module
   def get_origin_by_multiple_regex(regex)
     regex.map { |r| Module.get_origin_by_regex(r) }.flatten(1).uniq
   end
+
 end
 
 # TODO: Cambiar a chequeo de condiciones
 class Object
-  def where
-    'holis'
+  def where(*condiciones)
+    regex_nombres = condiciones.select { |c| c.is_a?(Regexp) }
+    metodo = condiciones.select { |c| c.is_a?(Symbol) }.first
+    todos_los_metodos = condiciones.last.last.methods
+    todos_los_metodos.select { |m| regex_nombres.first.match(m) }
+  end
+
+  def name(regex)
+    regex
+  end
+
+  def is_private
+    :private_methods
+  end
+
+  def is_public
+    :public_methods
   end
 end
