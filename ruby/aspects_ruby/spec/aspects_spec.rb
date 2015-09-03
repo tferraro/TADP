@@ -12,37 +12,33 @@ describe 'Aspect origenes' do
     end
   end
 
+  it 'prueba' do
+    expect(Aspects.on(MiClase) { where }).to eq('Me pasaste MiClase y holis')
+  end
+
   it 'chequear parametros pasados' do
-
     miObjeto = MiClase.new
-
-    aspect = Aspects.new
-    expect(aspect.on(MiClase, miObjeto, MiModulo) { 'hola!' }).to eq("Me pasaste MiClase, #{miObjeto}, MiModulo y hola!")
+    expect(Aspects.on(MiClase, miObjeto, MiModulo) { 'hola!' }).to eq("Me pasaste MiClase, #{miObjeto}, MiModulo y hola!")
   end
 
   it 'falla por no pasarle un bloque' do
-    aspect = Aspects.new
-    expect { aspect.on(MiClase) }.to raise_error(ArgumentError, 'wrong number of arguments (0 for +1)')
+    expect { Aspects.on(MiClase) }.to raise_error(ArgumentError, 'wrong number of arguments (0 for +1)')
   end
 
   it 'falla por no pasarle orgien' do
-    aspect = Aspects.new
-    expect { aspect.on { 'hola' } }.to raise_error(ArgumentError, 'origen vacio')
+    expect { Aspects.on { 'hola' } }.to raise_error(ArgumentError, 'origen vacio')
   end
 
   it 'acepta regex de una clase que existe' do
-    aspect = Aspects.new
-    expect(aspect.on(/MiClase/) { 'hola' }).to eq ('Me pasaste MiClase y hola')
+    expect(Aspects.on(/MiClase/) { 'hola' }).to eq ('Me pasaste MiClase y hola')
   end
 
   it 'falla regex de una clase que no existe' do
-    aspect = Aspects.new
-    expect { aspect.on(/Saraza/) { 'hola' } }.to raise_error(ArgumentError, 'origen vacio')
+    expect { Aspects.on(/Saraza/) { 'hola' } }.to raise_error(ArgumentError, 'origen vacio')
   end
 
   it 'acepta regex parcial de una clase que existe' do
-    aspect = Aspects.new
-    expect(aspect.on(/^Mi.*/) { 'hola' }).to eq ('Me pasaste MiClase, MiModulo y hola')
+    expect(Aspects.on(/^Mi.*/) { 'hola' }).to eq ('Me pasaste MiClase, MiModulo y hola')
   end
 end
 

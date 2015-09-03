@@ -1,16 +1,16 @@
 class Aspects
-  def on(*objetos, &condicion)
+  def Aspects.on(*objetos, &condicion)
     origenes = validar_argumentos(objetos, condicion)
     "Me pasaste #{origenes.join(', ')} y #{condicion.call}"
   end
 
-  def validar_argumentos(objetos, condicion)
+  def self.validar_argumentos(objetos, condicion)
     raise ArgumentError, 'wrong number of arguments (0 for +1)' if condicion.nil?
     raise ArgumentError, 'origen vacio' if objetos.empty?
     convertir_a_origenes_validos(objetos)
   end
 
-  def convertir_a_origenes_validos(objetos)
+  def self.convertir_a_origenes_validos(objetos)
     regexs = objetos.select { |origen| origen.is_a? Regexp }
     origenes_regex = Module.get_origin_by_multiple_regex(regexs)
     raise ArgumentError, 'origen vacio' if !regexs.empty? && origenes_regex.empty?
@@ -41,5 +41,12 @@ class Module
 
   def get_origin_by_multiple_regex(regex)
     regex.map { |r| Module.get_origin_by_regex(r) }.flatten(1).uniq
+  end
+end
+
+# TODO: Cambiar a chequeo de condiciones
+class Object
+  def where
+    'holis'
   end
 end
