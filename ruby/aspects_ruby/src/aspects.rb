@@ -2,7 +2,6 @@ class Aspects
   def Aspects.on(*objetos, &condicion)
     origenes = validar_argumentos(objetos, condicion)
     condicion.call origenes
-    condicion.inspect
     # Para chequear con los tests
     "Me pasaste #{origenes.join(', ')} y #{condicion.call origenes}"
   end
@@ -14,23 +13,10 @@ class Aspects
   end
 
   def self.convertir_a_origenes_validos(objetos)
-    regexs = objetos.select { |origen| origen.is_a? Regexp }
-    origenes_regex = Module.get_origin_by_multiple_regex(regexs)
-    raise ArgumentError, 'origen vacio' if !regexs.empty? && origenes_regex.empty?
-    objetos - regexs + origenes_regex
+    origenes_regex = Module.get_origin_by_multiple_regex(objetos.get_regexp)
+    raise ArgumentError, 'origen vacio' if !objetos.get_regexp.empty? && origenes_regex.empty?
+    objetos.remove_regexp + origenes_regex
   end
-
-  #Prueba de define_method, no tiene importancia
-  [Class, Module, Object].each do |origen|
-    define_method("#{origen}_exists?".downcase) do |nombre|
-      begin
-        Module.const_get(nombre).is_a?(origen)
-      rescue NameError
-        false
-      end
-    end
-  end
-
 end
 
 class Module
@@ -48,11 +34,11 @@ class Module
 
 end
 
-# TODO: Cambiar a chequeo de condiciones
 class Object
   def where(*condiciones)
-    regex_nombres = condiciones.select { |c| c.is_a?(Regexp) }
-    metodo = condiciones.select { |c| c.is_a?(Symbol) }.first
+    # TODO: Cambiar a chequeo de condiciones
+    regex_nombres = condiciones.get_regexp
+    metodo = condiciones.get_symbols.first
     todos_los_metodos = condiciones.last.last.methods
     todos_los_metodos.select { |m| regex_nombres.first.match(m) }
   end
@@ -67,5 +53,34 @@ class Object
 
   def is_public
     :public_methods
+  end
+end
+
+class Array
+  def get_regexp
+    self.select { |o| o.is_a? (Regexp) }
+  end
+
+  def get_symbols
+    self.select { |o| o.is_a? (Symbol) }
+  end
+
+  def remove_regexp
+    self - get_regexp
+  end
+end
+
+
+class Aspects
+
+  #Prueba de define_method, no tiene importancia
+  [Class, Module, Object].each do |origen|
+    define_method("#{origen}_exists?".downcase) do |nombre|
+      begin
+        Module.const_get(nombre).is_a?(origen)
+      rescue NameError
+        false
+      end
+    end
   end
 end

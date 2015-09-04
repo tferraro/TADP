@@ -42,7 +42,7 @@ describe 'Aspect origenes' do
   end
 
   it 'falla por no pasarle un bloque' do
-    expect { Aspects.on(MiClase) }.to raise_error(ArgumentError, 'wrong number of arguments (0 for +1)')
+    expect { Aspects.on MiClase }.to raise_error(ArgumentError, 'wrong number of arguments (0 for +1)')
   end
 
   it 'falla por no pasarle orgien' do
