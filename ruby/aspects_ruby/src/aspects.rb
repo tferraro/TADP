@@ -29,18 +29,16 @@ class Module
   end
 
   def get_origin_by_multiple_regex(regex)
-    regex.map { |r| Module.get_origin_by_regex(r) }.flatten(1).uniq
+    regex.map { |r| Module.get_origin_by_regex(r) }.flatten_lvl_one_unique
   end
-
 end
 
 class Object
   def where(*condiciones)
     # TODO: Cambiar a chequeo de condiciones
-    regex_nombres = condiciones.get_regexp
-    metodo = condiciones.get_symbols.first
-    todos_los_metodos = condiciones.last.last.methods
-    todos_los_metodos.select { |m| regex_nombres.first.match(m) }
+    metodo = condiciones.get_symbols.first #El primero que llega se lo queda ;)
+    todos_los_metodos = condiciones.last.map { |c| c.send(metodo.nil? ? :methods : metodo) }.flatten_lvl_one_unique
+    todos_los_metodos.select { |m| condiciones.get_regexp.first.match(m) }
   end
 
   def name(regex)
@@ -67,6 +65,10 @@ class Array
 
   def remove_regexp
     self - get_regexp
+  end
+
+  def flatten_lvl_one_unique
+    self.flatten(1).uniq
   end
 end
 

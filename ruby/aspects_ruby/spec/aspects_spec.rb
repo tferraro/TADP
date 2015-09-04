@@ -13,14 +13,20 @@ describe 'Aspect condiciones' do
 
       end
     end
+
+    module Modulo2
+      def self.bario
+
+      end
+    end
   end
 
   it 'probar condiciones de visibilidad is_public y name' do
     expect(
-        Aspects.on(MiClase) do |hey|
+        Aspects.on(MiClase, Modulo2) do |hey|
           where name(/bar/), is_public, hey
 
-        end).to eq('Me pasaste MiClase y [:bar]')
+        end).to eq('Me pasaste MiClase, Modulo2 y [:bar, :bario]')
   end
 end
 
