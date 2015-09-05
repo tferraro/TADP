@@ -35,12 +35,12 @@ describe 'Aspect condiciones' do
       private def foo
       end
     end
-    miObjetito = MiClase.new
+    mi_objetito = MiClase.new
     expect(
-        Aspects.on(miObjetito) do |hey|
+        Aspects.on(mi_objetito) do |hey|
           where name(/foo/), is_private, hey
 
-        end).to eq("Me pasaste #{miObjetito} y [:foo]")
+        end).to eq("Me pasaste #{mi_objetito} y [:foo]")
   end
   it ' pruba2' do
     expect(
@@ -65,8 +65,8 @@ describe 'Aspect origenes' do
   end
 
   it 'chequear parametros pasados' do
-    miObjeto = MiClase.new
-    expect(Aspects.on(MiClase, miObjeto, MiModulo) { 'hola!' }).to eq("Me pasaste MiClase, #{miObjeto}, MiModulo y hola!")
+    mi_objeto = MiClase.new
+    expect(Aspects.on(MiClase, mi_objeto, MiModulo) { 'hola!' }).to eq("Me pasaste MiClase, #{mi_objeto}, MiModulo y hola!")
   end
 
   it 'falla por no pasarle un bloque' do
@@ -120,6 +120,9 @@ describe 'Aspect parseo de regex y demaces' do
     expect(Module._get_symbol_by_regex(/Saraza/)).to eq([])
   end
 
+
+
+  #Prueba de define_method, no tiene importancia
   it 'matcheo con nombres de clases' do
     class MiClase
 

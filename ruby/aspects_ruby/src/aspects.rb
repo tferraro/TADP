@@ -15,7 +15,7 @@ class Aspects
   def self.convertir_a_origenes_validos(objetos)
     origenes_regex = Module.get_origin_by_multiple_regex(objetos.get_regexp)
     raise ArgumentError, 'origen vacio' if !objetos.get_regexp.empty? && origenes_regex.empty?
-    objetos.remove_regexp + origenes_regex
+    objetos.get_neg_regexp + origenes_regex
   end
 end
 
@@ -66,7 +66,7 @@ class Array
     self.select { |o| o.is_a? (Symbol) }
   end
 
-  def remove_regexp
+  def get_neg_regexp
     self - get_regexp
   end
 
