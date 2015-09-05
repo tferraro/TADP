@@ -37,8 +37,10 @@ class Object
   def where(*condiciones)
     # TODO: Cambiar a chequeo de condiciones
     metodo = condiciones.get_symbols.first #El primero que llega se lo queda ;)
+    #Por ahora la ultima condicion es nuestra lista de origenes
     todos_los_metodos = condiciones.last.map { |c| c.send(metodo.nil? ? :methods : metodo) }.flatten_lvl_one_unique
-    todos_los_metodos.select { |m| condiciones.get_regexp.first.match(m) }
+    metodos_filtrados = condiciones.get_regexp.map { |r| todos_los_metodos.select { |m| r.match(m) } }.flatten_lvl_one_unique
+    !metodos_filtrados.empty? ? metodos_filtrados : todos_los_metodos
   end
 
   def name(regex)
@@ -52,6 +54,7 @@ class Object
   def is_public
     :public_methods
   end
+
 end
 
 class Array
