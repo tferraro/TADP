@@ -40,15 +40,15 @@ describe 'Aspect condiciones' do
       def bar
       end
 
-      private def foo
+      def foo
       end
+      private_class_method :foo
     end
-    mi_objetito = MiClase.new
     expect(
-        Aspects.on(mi_objetito) do
+        Aspects.on(MiClase) do
           where name(/foo/), is_private
 
-        end).to eq("Me pasaste #{mi_objetito} y [:foo]")
+        end).to eq('Me pasaste MiClase y [:foo]')
   end
   it 'probar condiciones de visibilidad is_public sin name' do
     expect(
@@ -58,6 +58,19 @@ describe 'Aspect condiciones' do
         end).to eq("Me pasaste MiClase y #{MiClase.public_methods}")
 
   end
+
+  # it 'probar si tiene parametros determinados' do
+  #   class MiClase
+  #     def pepita(param1, param2, param3, param4)
+  #
+  #     end
+  #   end
+  #   expect(
+  #       Aspects.on(MiClase) do
+  #         where has_parameters(4)
+  #       end).to eq('Me pasaste MiClase y pepita')
+  #
+  # end
 end
 
 
