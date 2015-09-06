@@ -42,6 +42,7 @@ describe 'Aspect condiciones' do
 
       def foo
       end
+
       private_class_method :foo
     end
     expect(
@@ -59,18 +60,30 @@ describe 'Aspect condiciones' do
 
   end
 
-  # it 'probar si tiene parametros determinados' do
-  #   class MiClase
-  #     def pepita(param1, param2, param3, param4)
-  #
-  #     end
-  #   end
-  #   expect(
-  #       Aspects.on(MiClase) do
-  #         where has_parameters(4)
-  #       end).to eq('Me pasaste MiClase y pepita')
-  #
-  # end
+  it 'probar si tiene parametros determinados' do
+    class MiClase
+      def self.pepita(param1, param2, param3, param4 = 3)
+
+      end
+
+      def self.pepita2(param1, param2 = 2, param3 = 3, param4 = 4, param5 = 3)
+
+      end
+    end
+    expect(
+        Aspects.on(MiClase) do
+          where has_parameters(4)
+        end).to eq('Me pasaste MiClase y [:pepita]')
+    expect(
+        Aspects.on(MiClase) do
+          where has_parameters(4, opcional)
+        end).to eq('Me pasaste MiClase y [:pepita2]')
+    expect(
+        Aspects.on(MiClase) do
+          where has_parameters(3, requerido)
+        end).to eq('Me pasaste MiClase y [:pepita]')
+
+  end
 end
 
 

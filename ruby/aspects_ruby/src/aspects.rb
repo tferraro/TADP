@@ -1,4 +1,5 @@
 class Aspects
+
   def Aspects.on(*objetos, &condicion)
     _validar_argumentos(objetos, condicion)
     @origenes = _convertir_a_origenes_validos(objetos)
@@ -42,7 +43,7 @@ class Aspects
   end
 
   def self.has_parameters(cant, tipo = nil)
-    [cant, tipo]
+    @origenes.map { |o| self._get_origin_methods_by_parameters(o, cant, tipo) }.flatten_lvl_one_unique
   end
 
   def self.requerido
@@ -53,17 +54,22 @@ class Aspects
     :opt
   end
 
-  def self._get_origin_methods_by_parameters(origin, cant, tipo = nil)
+  def self._get_origin_methods_by_parameters(origin, cant, tipo)
     origin.methods.select do |s|
       parametros = origin.method(s).parameters
-      parametros = parametros.select { |d| d.include?(tipo) }.flatten.select { |d| d != tipo } unless tipo.nil?
+      parametros = parametros.select { |d| d.include?(tipo) }
+                       .flatten
+                       .select { |d| d != tipo } unless tipo.nil?
       parametros.count.equal? cant
     end
   end
 
+
+  def self._bla(origin, cant, tipo, s)
+  end
+
   private_class_method :_validar_argumentos
   private_class_method :_convertir_a_origenes_validos
-  private_class_method :_get_origin_methods_by_parameters
 end
 
 class Module
