@@ -37,10 +37,10 @@ describe 'Aspect condiciones' do
 
   it 'probamos el filtro de privados' do
     class MiClase
-      def bar
+      def self.bar
       end
 
-      def foo
+      def self.foo
       end
 
       private_class_method :foo
@@ -51,6 +51,19 @@ describe 'Aspect condiciones' do
 
         end).to eq('Me pasaste MiClase y [:foo]')
   end
+
+  it 'probamos que no matchee nada' do
+    class MiClase
+      def self.bar
+      end
+    end
+    expect(
+        Aspects.on(MiClase) do
+          where name(/metodo_inexitente/), is_private
+
+        end).to eq('Me pasaste MiClase y []')
+  end
+
   it 'probar condiciones de visibilidad is_public sin name' do
     expect(
         Aspects.on(MiClase) do

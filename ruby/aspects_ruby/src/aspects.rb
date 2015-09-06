@@ -7,39 +7,23 @@ class Aspects
     "Me pasaste #{@origenes.join(', ')} y #{metodos}"
   end
 
-  def self._validar_argumentos(objetos, condicion)
-    raise ArgumentError, 'wrong number of arguments (0 for +1)' if condicion.nil?
-    raise ArgumentError, 'origen vacio' if objetos.empty?
-  end
-
-  def self._convertir_a_origenes_validos(objetos)
-    origenes_regex = Module.get_origin_by_multiple_regex(objetos.get_regexp)
-    raise ArgumentError, 'origen vacio' if !objetos.get_regexp.empty? && origenes_regex.empty?
-    objetos.get_neg_regexp + origenes_regex
-  end
-
-
   def self.where(*condiciones)
-    metodo = condiciones.get_symbols.select { |s| [is_private, is_public].include? s }.first
-    regex_matching = condiciones.select { |s| s.is_a? (Array) }.flatten
-    #El primero que llega se lo queda ;)
-    todos_los_metodos = @origenes.map { |o| o.send(metodo.nil? ? :methods : metodo) }.flatten_lvl_one_unique
-    metodos_filtrados = todos_los_metodos.select { |m| regex_matching.include? m }
-    metodos_simples = !metodos_filtrados.empty? ? metodos_filtrados : todos_los_metodos
-
-    #Joya.new.method(:holis).parameters.select { |d| d.include?(:req)}.flatten.select {|d| d != :req}.count == 1
+    condiciones.select { |s| s.is_a? (Array) }.intersect_arrays
   end
 
   def self.name(regex)
-    Symbol.all_symbols.select { |s| regex.match(s) }
+    @origenes
+        .map { |o| o.all_methods }
+        .flatten_lvl_one_unique
+        .select { |s| regex.match(s) }
   end
 
   def self.is_private
-    :private_methods
+    _get_methods_by_visibility(:private_methods)
   end
 
   def self.is_public
-    :public_methods
+    _get_methods_by_visibility(:public_methods)
   end
 
   def self.has_parameters(cant, tipo = nil)
@@ -54,6 +38,30 @@ class Aspects
     :opt
   end
 
+  def self._get_methods_call_from(condition_array)
+    condition_array
+        .get_symbols
+        .select { |s| [is_private, is_public].include? s }
+        .first
+  end
+
+  def self._get_methods_by_visibility(sym_visibilidad)
+    @origenes
+        .map { |o| o.send(sym_visibilidad.nil? ? :all_methods : sym_visibilidad) }
+        .flatten_lvl_one_unique
+  end
+
+  def self._validar_argumentos(objetos, condicion)
+    raise ArgumentError, 'wrong number of arguments (0 for +1)' if condicion.nil?
+    raise ArgumentError, 'origen vacio' if objetos.empty?
+  end
+
+  def self._convertir_a_origenes_validos(objetos)
+    origenes_regex = Module.get_origin_by_multiple_regex(objetos.get_regexp)
+    raise ArgumentError, 'origen vacio' if !objetos.get_regexp.empty? && origenes_regex.empty?
+    objetos.get_neg_regexp + origenes_regex
+  end
+
   def self._get_origin_methods_by_parameters(origin, cant, tipo)
     origin.methods.select do |s|
       parametros = origin.method(s).parameters
@@ -64,12 +72,15 @@ class Aspects
     end
   end
 
-
-  def self._bla(origin, cant, tipo, s)
-  end
-
   private_class_method :_validar_argumentos
   private_class_method :_convertir_a_origenes_validos
+  private_class_method :_get_methods_call_from
+end
+
+class Object
+  def all_methods(type = true)
+    self.private_methods(type) + self.public_methods(type)
+  end
 end
 
 class Module
@@ -99,8 +110,13 @@ class Array
     self - get_regexp
   end
 
-
   def flatten_lvl_one_unique
     self.flatten(1).uniq
+  end
+
+  def intersect_arrays
+    every_element = self.flatten_lvl_one_unique
+    self.each { |a| every_element = every_element & a }
+    every_element
   end
 end
