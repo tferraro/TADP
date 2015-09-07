@@ -76,15 +76,16 @@ describe 'Aspect condiciones' do
   it 'probar si tiene parametros determinados' do
     class MiClase
       def self.pepita(param1, param2, param3, param4 = 3, param5 = 1, param6)
-
+        param1 + param2 + param3 + param4 + param5 + param6
       end
 
       def self.pepita2(param1, param2 = 2, param3 = 3, param4 = 4, param5 = 3)
+        param1 + param2 + param3 + param4 + param5
 
       end
 
       def self.pepita3(nananananannabatman)
-
+        nananananannabatman
       end
     end
     expect(

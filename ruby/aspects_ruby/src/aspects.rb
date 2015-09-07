@@ -32,7 +32,7 @@ class Aspects
       regex = tipo
       tipo = nil
     end
-    @origenes.map { |o| o.get_origin_methods_by_parameters(cant, tipo, regex) }.flatten_lvl_one_unique
+    @origenes.map { |o| o.get_origin_methods(cant, tipo, regex) }.flatten_lvl_one_unique
   end
 
   def self.requerido
@@ -90,7 +90,7 @@ class Module
     regex.map { |r| Module.get_origin_by_regex(r) }.flatten_lvl_one_unique
   end
 
-  def get_origin_methods_by_parameters(cant, tipo, regex)
+  def get_origin_methods(cant, tipo, regex)
     all_methods.select do |s|
       parametros = method(s).parameters
       unless tipo.nil?
