@@ -109,6 +109,20 @@ describe 'Aspect condiciones' do
           where has_parameters(1, /^nana.*/)
         end).to eq('Me pasaste MiClase y [:pepita3]')
   end
+
+  # it 'probar la negacion de has_parameters' do
+  #
+  #   class MiClase
+  #     def self.pepita(param1, param2, param3, param4 = 3, param5 = 1, param6)
+  #       param1 + param2 + param3 + param4 + param5 + param6
+  #     end
+  #   end
+  #
+  #   expect(
+  #       Aspects.on(MiClase) do
+  #         where neg(has_parameters(6))
+  #       end).to eq("Me pasaste MiClase y #{MiClase.all_methods - :pepita}")
+  # end
 end
 
 

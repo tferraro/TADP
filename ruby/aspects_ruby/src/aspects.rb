@@ -8,22 +8,22 @@ class Aspects
   end
 
   def self.where(*condiciones)
-    condiciones.select { |s| s.is_a? (Array) }.intersect_arrays
+    condiciones.map { |_, m| m }.intersect_arrays
   end
 
   def self.name(regex)
-    @origenes
-        .map { |o| o.all_methods }
-        .flatten_lvl_one_unique
-        .select { |s| regex.match(s) }
+    [:name, @origenes
+                .map { |o| o.all_methods }
+                .flatten_lvl_one_unique
+                .select { |s| regex.match(s) }]
   end
 
   def self.is_private
-    _get_methods_by_visibility(:private_methods)
+    [:is_private, _get_methods_by_visibility(:private_methods)]
   end
 
   def self.is_public
-    _get_methods_by_visibility(:public_methods)
+    [:is_public, _get_methods_by_visibility(:public_methods)]
   end
 
   def self.has_parameters(cant, tipo = /.*/)
@@ -32,7 +32,7 @@ class Aspects
       regex = tipo
       tipo = nil
     end
-    @origenes.map { |o| o.get_origin_methods(cant, tipo, regex) }.flatten_lvl_one_unique
+    [:has_parameters, @origenes.map { |o| o.get_origin_methods(cant, tipo, regex) }.flatten_lvl_one_unique]
   end
 
   def self.requerido
@@ -42,6 +42,12 @@ class Aspects
   def self.opcional
     :opt
   end
+
+  def self.neg(dupla_metodos_condicion)
+      
+  end
+
+  #Internal Methods
 
   def self._get_methods_call_from(condition_array)
     condition_array
