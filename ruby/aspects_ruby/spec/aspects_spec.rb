@@ -75,17 +75,21 @@ describe 'Aspect condiciones' do
 
   it 'probar si tiene parametros determinados' do
     class MiClase
-      def self.pepita(param1, param2, param3, param4 = 3)
+      def self.pepita(param1, param2, param3, param4 = 3, param5 = 1, param6)
 
       end
 
       def self.pepita2(param1, param2 = 2, param3 = 3, param4 = 4, param5 = 3)
 
       end
+
+      def self.pepita3(nananananannabatman)
+
+      end
     end
     expect(
         Aspects.on(MiClase) do
-          where has_parameters(4)
+          where has_parameters(6)
         end).to eq('Me pasaste MiClase y [:pepita]')
     expect(
         Aspects.on(MiClase) do
@@ -93,9 +97,16 @@ describe 'Aspect condiciones' do
         end).to eq('Me pasaste MiClase y [:pepita2]')
     expect(
         Aspects.on(MiClase) do
-          where has_parameters(3, requerido)
+          where has_parameters(4, requerido)
         end).to eq('Me pasaste MiClase y [:pepita]')
-
+    expect(
+        Aspects.on(MiClase) do
+          where has_parameters(1, /nananananannabatman/)
+        end).to eq('Me pasaste MiClase y [:pepita3]')
+    expect(
+        Aspects.on(MiClase) do
+          where has_parameters(1, /^nana.*/)
+        end).to eq('Me pasaste MiClase y [:pepita3]')
   end
 end
 

@@ -26,8 +26,13 @@ class Aspects
     _get_methods_by_visibility(:public_methods)
   end
 
-  def self.has_parameters(cant, tipo = nil)
-    @origenes.map { |o| self._get_origin_methods_by_parameters(o, cant, tipo) }.flatten_lvl_one_unique
+  def self.has_parameters(cant, tipo = /.*/)
+    regex = /.*/
+    if tipo.is_a? (Regexp)
+      regex = tipo
+      tipo = nil
+    end
+    @origenes.map { |o| o.get_origin_methods_by_parameters(cant, tipo, regex) }.flatten_lvl_one_unique
   end
 
   def self.requerido
@@ -62,28 +67,17 @@ class Aspects
     objetos.get_neg_regexp + origenes_regex
   end
 
-  def self._get_origin_methods_by_parameters(origin, cant, tipo)
-    origin.methods.select do |s|
-      parametros = origin.method(s).parameters
-      parametros = parametros.select { |d| d.include?(tipo) }
-                       .flatten
-                       .select { |d| d != tipo } unless tipo.nil?
-      parametros.count.equal? cant
-    end
-  end
-
   private_class_method :_validar_argumentos
   private_class_method :_convertir_a_origenes_validos
   private_class_method :_get_methods_call_from
 end
 
-class Object
+class Module
+
   def all_methods(type = true)
     self.private_methods(type) + self.public_methods(type)
   end
-end
 
-class Module
   def _get_class_symbol_by_regex(regex)
     self.constants.select { |c| regex.match(c) }
   end
@@ -94,6 +88,17 @@ class Module
 
   def get_origin_by_multiple_regex(regex)
     regex.map { |r| Module.get_origin_by_regex(r) }.flatten_lvl_one_unique
+  end
+
+  def get_origin_methods_by_parameters(cant, tipo, regex)
+    all_methods.select do |s|
+      parametros = method(s).parameters
+      unless tipo.nil?
+        parametros = parametros.select { |t, _| t == tipo }
+      end
+      parametros = parametros.select { |_, n| regex.match(n) }
+      parametros.map { |t, _| t }.count.equal? cant
+    end
   end
 end
 
