@@ -8,22 +8,19 @@ class Aspects
   end
 
   def self.where(*condiciones)
-    condiciones.map { |_, m| m }.intersect_arrays
+    condiciones.intersect_multi_arrays
   end
 
   def self.name(regex)
-    [:name, @origenes
-                .map { |o| o.all_methods }
-                .flatten_lvl_one_unique
-                .select { |s| regex.match(s) }]
+    _get_origins_methods.select { |s| regex.match(s) }
   end
 
   def self.is_private
-    [:is_private, _get_methods_by_visibility(:private_methods)]
+    _get_methods_by_visibility(:private_methods)
   end
 
   def self.is_public
-    [:is_public, _get_methods_by_visibility(:public_methods)]
+    _get_methods_by_visibility(:public_methods)
   end
 
   def self.has_parameters(cant, tipo = /.*/)
@@ -32,7 +29,7 @@ class Aspects
       regex = tipo
       tipo = nil
     end
-    [:has_parameters, @origenes.map { |o| o.get_origin_methods(cant, tipo, regex) }.flatten_lvl_one_unique]
+    @origenes.map { |o| o.get_origin_methods(cant, tipo, regex) }.flatten_lvl_one_unique
   end
 
   def self.requerido
@@ -43,11 +40,15 @@ class Aspects
     :opt
   end
 
-  def self.neg(dupla_metodos_condicion)
-      
+  def self.neg(metodos_condicion)
+    _get_origins_methods - metodos_condicion
   end
 
   #Internal Methods
+
+  def self._get_origins_methods
+    @origenes.map { |o| o.all_methods }.flatten_lvl_one_unique
+  end
 
   def self._get_methods_call_from(condition_array)
     condition_array
@@ -73,9 +74,11 @@ class Aspects
     objetos.get_neg_regexp + origenes_regex
   end
 
+  private_class_method :_get_origins_methods
+  private_class_method :_get_methods_call_from
+  private_class_method :_get_methods_by_visibility
   private_class_method :_validar_argumentos
   private_class_method :_convertir_a_origenes_validos
-  private_class_method :_get_methods_call_from
 end
 
 class Module
@@ -125,7 +128,7 @@ class Array
     self.flatten(1).uniq
   end
 
-  def intersect_arrays
+  def intersect_multi_arrays
     every_element = self.flatten_lvl_one_unique
     self.each { |a| every_element = every_element & a }
     every_element

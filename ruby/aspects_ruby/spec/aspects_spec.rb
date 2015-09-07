@@ -110,19 +110,60 @@ describe 'Aspect condiciones' do
         end).to eq('Me pasaste MiClase y [:pepita3]')
   end
 
-  # it 'probar la negacion de has_parameters' do
-  #
-  #   class MiClase
-  #     def self.pepita(param1, param2, param3, param4 = 3, param5 = 1, param6)
-  #       param1 + param2 + param3 + param4 + param5 + param6
-  #     end
-  #   end
-  #
-  #   expect(
-  #       Aspects.on(MiClase) do
-  #         where neg(has_parameters(6))
-  #       end).to eq("Me pasaste MiClase y #{MiClase.all_methods - :pepita}")
-  # end
+  it 'probar la negacion de has_parameters' do
+
+    class MiClase
+      def self.pepita(param1, param2, param3, param4 = 3, param5 = 1, param6)
+        param1 + param2 + param3 + param4 + param5 + param6
+      end
+
+      def self.pepita25
+
+      end
+    end
+
+    expect(
+        Aspects.on(MiClase) do
+          where neg(has_parameters(6))
+        end).to eq("Me pasaste MiClase y #{MiClase.all_methods - [:pepita]}")
+
+    expect(
+        Aspects.on(MiClase) do
+          where neg(has_parameters(6)), name(/pepita/)
+        end).to eq("Me pasaste MiClase y #{Aspects.name(/pepita/) - [:pepita]}")
+  end
+
+  it 'probar la negacion de name' do
+    class MiClase
+      def self.bar
+      end
+
+      def self.foo
+      end
+    end
+    module MiModulo
+      def self.bario
+      end
+    end
+    expect(
+        Aspects.on(MiClase, MiModulo) do
+          where neg(name(/bar/))
+        end).to eq("Me pasaste MiClase, MiModulo y #{Aspects.name(/.*/) - [:bar, :bario]}")
+  end
+
+  it 'probar la negacion de is_public' do
+    expect(
+        Aspects.on(MiClase) do
+          where neg(is_public)
+        end).to eq("Me pasaste MiClase y #{MiClase.private_methods}")
+  end
+
+  it 'probar la negacion de is_private' do
+    expect(
+        Aspects.on(MiClase) do
+          where neg(is_private)
+        end).to eq("Me pasaste MiClase y #{MiClase.public_methods}")
+  end
 end
 
 
