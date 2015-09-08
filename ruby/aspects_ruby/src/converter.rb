@@ -40,7 +40,7 @@ class Aspect_Converter
     _get_origins_methods - metodos_condicion
   end
 
-  # Transformaciones
+  # Transformaciones <- Todavia no hace nada D:
 
   def transform(metodos, &transf)
     self.instance_eval &transf
@@ -51,6 +51,20 @@ class Aspect_Converter
     condition
   end
 
+  def redirect_to(new_origin)
+    new_origin
+  end
+  def before(&block)
+    block.call
+  end
+
+  def after(&block)
+    block.call
+  end
+
+  def instead_of(&block)
+    block.call
+  end
 
   #Internal Methods
   private
