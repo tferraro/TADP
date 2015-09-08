@@ -162,7 +162,7 @@ describe 'Aspect condiciones' do
     end
     a = A.new
 
-    def a.holas
+    def a.holas(param1, param2)
       'holas'
     end
 
@@ -170,6 +170,11 @@ describe 'Aspect condiciones' do
         Aspects.on(a) do
           where name(/hol/), is_public
         end).to eq("Me pasaste #{a} y [:holas, :holis]")
+
+    expect(
+        Aspects.on(a) do
+          where name(/hol/), is_public, has_parameters(2)
+        end).to eq("Me pasaste #{a} y [:holas]")
   end
 
   it 'probar la negacion de name' do

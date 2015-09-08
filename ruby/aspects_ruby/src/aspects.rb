@@ -148,7 +148,11 @@ class Object
 
   def get_origin_methods(cant, tipo, regex)
     all_methods.select do |s|
+      begin
       parametros = instance_method(s).parameters
+      rescue
+      parametros = method(s).parameters
+      end
       unless tipo.nil?
         parametros = parametros.select { |t, _| t == tipo }
       end
