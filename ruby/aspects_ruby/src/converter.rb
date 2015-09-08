@@ -1,10 +1,6 @@
 class Aspect_Converter
   attr_accessor :origins
 
-  def convert_origins(conditions)
-    self.instance_eval &conditions
-  end
-
   # Condiciones
 
   def where(*condiciones)
@@ -12,7 +8,7 @@ class Aspect_Converter
   end
 
   def name(regex)
-    _get_origins_methods.select { |s| regex.match(s) }
+    _get_origins_methods.select { |s| regex.match(s.name) }
   end
 
   def is_private
@@ -74,26 +70,23 @@ class Aspect_Converter
     origins
         .map do |o|
       begin
-        o.send(sym_visibilidad.first)
+        o.send(sym_visibilidad.first).map { |s| o.instance_method(s) }
       rescue
-        o.send(sym_visibilidad.last)
+        o.send(sym_visibilidad.last).map { |s| o.method(s) }
       end
-    end.flatten_lvl_one_unique
+    end
+        .flatten_lvl_one_unique
   end
 
   def _all_methods(origin, type = true)
-    origin.private_instance_methods(type) + origin.public_instance_methods(type)
+    (origin.private_instance_methods(type) + origin.public_instance_methods(type)).map { |s| origin.instance_method(s) }
   rescue
-    origin.private_methods(type) + origin.public_methods(type)
+    (origin.private_methods(type) + origin.public_methods(type)).map { |s| origin.method(s) }
   end
 
   def _get_origin_methods(origin, cant, tipo, regex)
     _all_methods(origin).select do |s|
-      begin
-        parametros = origin.instance_method(s).parameters
-      rescue
-        parametros = origin.method(s).parameters
-      end
+      parametros = s.parameters
       unless tipo.nil?
         parametros = parametros.select { |t, _| t == tipo }
       end
@@ -101,6 +94,7 @@ class Aspect_Converter
       parametros.map { |t, _| t }.count.equal? cant
     end
   end
+
 end
 
 

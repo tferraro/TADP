@@ -90,7 +90,7 @@ describe 'Aspect condiciones' do
         Aspects.on(MiClase) do
           where is_public
 
-        end).to eq("Me pasaste MiClase y #{MiClase.public_instance_methods}")
+        end).to eq("Me pasaste MiClase y #{MiClase.send(:public_instance_methods)}")
 
   end
 
@@ -223,7 +223,7 @@ describe 'Aspect origenes' do
 
   it 'chequear parametros pasados' do
     mi_objeto = MiClase.new
-    expect(Aspects.on(MiClase, mi_objeto, MiModulo) { :class }).to eq("Me pasaste MiClase, #{mi_objeto}, MiModulo y class")
+    expect(Aspects.on(MiClase, mi_objeto, MiModulo) { [MiClase.instance_method(:class)] }).to eq("Me pasaste MiClase, #{mi_objeto}, MiModulo y [:class]")
   end
 
   it 'falla por no pasarle un bloque' do
@@ -235,15 +235,15 @@ describe 'Aspect origenes' do
   end
 
   it 'acepta regex de una clase que existe' do
-    expect(Aspects.on(/MiClase/) { :class }).to eq ('Me pasaste MiClase y class')
+    expect(Aspects.on(/MiClase/) { [MiClase.instance_method(:class)] }).to eq ('Me pasaste MiClase y [:class]')
   end
 
   it 'falla regex de una clase que no existe' do
-    expect { Aspects.on(/Saraza/) { :class } }.to raise_error(ArgumentError, 'origen vacio')
+    expect { Aspects.on(/Saraza/) { [MiClase.instance_method(:class)] } }.to raise_error(ArgumentError, 'origen vacio')
   end
 
   it 'acepta regex parcial de una clase que existe' do
-    expect(Aspects.on(/^Mi.*/) { :class }).to eq ('Me pasaste MiClase, MiModulo y class')
+    expect(Aspects.on(/^Mi.*/) { [MiClase.instance_method(:class)] }).to eq ('Me pasaste MiClase, MiModulo y [:class]')
   end
 end
 
