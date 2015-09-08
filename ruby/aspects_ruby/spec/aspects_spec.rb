@@ -4,11 +4,11 @@ require_relative '../src/aspects'
 describe 'Aspect transformaciones' do
   it 'probar transformacion base' do
     class MiClase
-      def self.hace_algo(p1, p2)
+      def hace_algo(p1, p2)
         p1 + '-' + p2
       end
 
-      def self.hace_otra_cosa(p2, ppp)
+      def hace_otra_cosa(p2, ppp)
         p2 + ':' + ppp
       end
     end
@@ -36,14 +36,14 @@ describe 'Aspect condiciones' do
 
   it 'probar condiciones de visibilidad is_public y name' do
     class MiClase
-      def self.bar
+      def bar
       end
 
-      def self.foo
+      def foo
       end
     end
     module MiModulo
-      def self.bario
+      def bario
       end
     end
     expect(
@@ -59,13 +59,12 @@ describe 'Aspect condiciones' do
 
   it 'probamos el filtro de privados' do
     class MiClase
-      def self.bar
+      def bar
       end
 
-      def self.foo
+      private
+      def foo
       end
-
-      private_class_method :foo
     end
     expect(
         Aspects.on(MiClase) do
@@ -76,7 +75,7 @@ describe 'Aspect condiciones' do
 
   it 'probamos que no matchee nada' do
     class MiClase
-      def self.bar
+      def bar
       end
     end
     expect(
@@ -91,22 +90,22 @@ describe 'Aspect condiciones' do
         Aspects.on(MiClase) do
           where is_public
 
-        end).to eq("Me pasaste MiClase y #{MiClase.public_methods}")
+        end).to eq("Me pasaste MiClase y #{MiClase.public_instance_methods}")
 
   end
 
   it 'probar si tiene parametros determinados' do
     class MiClase
-      def self.pepita(param1, param2, param3, param4 = 3, param5 = 1, param6)
+      def pepita(param1, param2, param3, param4 = 3, param5 = 1, param6)
         param1 + param2 + param3 + param4 + param5 + param6
       end
 
-      def self.pepita2(param1, param2 = 2, param3 = 3, param4 = 4, param5 = 3)
+      def pepita2(param1, param2 = 2, param3 = 3, param4 = 4, param5 = 3)
         param1 + param2 + param3 + param4 + param5
 
       end
 
-      def self.pepita3(nananananannabatman)
+      def pepita3(nananananannabatman)
         nananananannabatman
       end
     end
@@ -135,11 +134,11 @@ describe 'Aspect condiciones' do
   it 'probar la negacion de has_parameters' do
 
     class MiClase
-      def self.pepita(param1, param2, param3, param4 = 3, param5 = 1, param6)
+      def pepita(param1, param2, param3, param4 = 3, param5 = 1, param6)
         param1 + param2 + param3 + param4 + param5 + param6
       end
 
-      def self.pepita25
+      def pepita25
 
       end
     end
@@ -157,14 +156,14 @@ describe 'Aspect condiciones' do
 
   it 'probar la negacion de name' do
     class MiClase
-      def self.bar
+      def bar
       end
 
-      def self.foo
+      def foo
       end
     end
     module MiModulo
-      def self.bario
+      def bario
       end
     end
     expect(
@@ -174,17 +173,28 @@ describe 'Aspect condiciones' do
   end
 
   it 'probar la negacion de is_public' do
+    class Two
+      def holis
+
+      end
+
+      private
+      def holas
+
+      end
+
+    end
     expect(
-        Aspects.on(MiClase) do
+        Aspects.on(Two) do
           where neg(is_public)
-        end).to eq("Me pasaste MiClase y #{MiClase.private_methods}")
+        end).to eq("Me pasaste Two y #{Two.private_instance_methods}")
   end
 
   it 'probar la negacion de is_private' do
     expect(
-        Aspects.on(MiClase) do
+        Aspects.on(Two) do
           where neg(is_private)
-        end).to eq("Me pasaste MiClase y #{MiClase.public_methods}")
+        end).to eq("Me pasaste Two y #{Two.public_instance_methods}")
   end
 end
 

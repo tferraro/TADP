@@ -16,11 +16,11 @@ class Aspects
   end
 
   def self.is_private
-    _get_methods_by_visibility(:private_methods)
+    _get_methods_by_visibility(:private_instance_methods)
   end
 
   def self.is_public
-    _get_methods_by_visibility(:public_methods)
+    _get_methods_by_visibility(:public_instance_methods)
   end
 
   def self.has_parameters(cant, tipo = /.*/)
@@ -93,7 +93,7 @@ end
 class Module
 
   def all_methods(type = true)
-    self.private_methods(type) + self.public_methods(type)
+    self.private_instance_methods(type) + self.public_instance_methods(type)
   end
 
   def _get_class_symbol_by_regex(regex)
@@ -110,7 +110,7 @@ class Module
 
   def get_origin_methods(cant, tipo, regex)
     all_methods.select do |s|
-      parametros = method(s).parameters
+      parametros = instance_method(s).parameters
       unless tipo.nil?
         parametros = parametros.select { |t, _| t == tipo }
       end
