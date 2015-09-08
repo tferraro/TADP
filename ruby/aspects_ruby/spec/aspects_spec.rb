@@ -154,6 +154,24 @@ describe 'Aspect condiciones' do
         end).to eq("Me pasaste MiClase y #{Aspects.name(/pepita/) - [:pepita]}")
   end
 
+  it 'probar name y public con un objeto' do
+    class A
+      def holis
+        'holis'
+      end
+    end
+    a = A.new
+
+    def a.holas
+      'holas'
+    end
+
+    expect(
+        Aspects.on(a) do
+          where name(/hol/), is_public
+        end).to eq("Me pasaste #{a} y [:holas, :holis]")
+  end
+
   it 'probar la negacion de name' do
     class MiClase
       def bar

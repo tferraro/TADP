@@ -16,11 +16,11 @@ class Aspects
   end
 
   def self.is_private
-    _get_methods_by_visibility(:private_instance_methods)
+    _get_methods_by_visibility([:private_instance_methods, :private_methods])
   end
 
   def self.is_public
-    _get_methods_by_visibility(:public_instance_methods)
+    _get_methods_by_visibility([:public_instance_methods, :public_methods])
   end
 
   def self.has_parameters(cant, tipo = /.*/)
@@ -68,7 +68,13 @@ class Aspects
 
   def self._get_methods_by_visibility(sym_visibilidad)
     @origenes
-        .map { |o| o.send(sym_visibilidad.nil? ? :all_methods : sym_visibilidad) }
+        .map do |o|
+      begin
+        o.send(sym_visibilidad.first.nil? ? :all_methods : sym_visibilidad.first)
+      rescue
+        o.send(sym_visibilidad.last.nil? ? :all_methods : sym_visibilidad.last)
+      end
+    end
         .flatten_lvl_one_unique
   end
 
@@ -90,10 +96,42 @@ class Aspects
   private_class_method :_convertir_a_origenes_validos
 end
 
+# TODO: Sacar todas las definiciones en Module y Object posibles.
+
 class Module
 
   def all_methods(type = true)
     self.private_instance_methods(type) + self.public_instance_methods(type)
+  end
+
+  def _get_class_symbol_by_regex(regex)
+    self.constants.select { |c| regex.match(c) }
+  end
+
+  def get_origin_by_regex(regex)
+    self._get_class_symbol_by_regex(regex).map { |symbol| self.const_get(symbol) }
+  end
+
+  def get_origin_by_multiple_regex(regex)
+    regex.map { |r| Module.get_origin_by_regex(r) }.flatten_lvl_one_unique
+  end
+
+  def get_origin_methods(cant, tipo, regex)
+    all_methods.select do |s|
+      parametros = instance_method(s).parameters
+      unless tipo.nil?
+        parametros = parametros.select { |t, _| t == tipo }
+      end
+      parametros = parametros.select { |_, n| regex.match(n) }
+      parametros.map { |t, _| t }.count.equal? cant
+    end
+  end
+end
+
+class Object
+
+  def all_methods(type = true)
+    self.private_methods(type) + self.public_methods(type)
   end
 
   def _get_class_symbol_by_regex(regex)
