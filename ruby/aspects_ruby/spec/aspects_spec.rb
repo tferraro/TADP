@@ -146,12 +146,7 @@ describe 'Aspect condiciones' do
     expect(
         Aspects.on(MiClase) do
           where neg(has_parameters(6))
-        end).to eq("Me pasaste MiClase y #{MiClase.all_methods - [:pepita]}")
-
-    expect(
-        Aspects.on(MiClase) do
-          where neg(has_parameters(6)), name(/pepita/)
-        end).to eq("Me pasaste MiClase y #{Aspects.name(/pepita/) - [:pepita]}")
+        end).to eq("Me pasaste MiClase y #{ MiClase.private_instance_methods(true) + MiClase.public_instance_methods(true) - [:pepita]}")
   end
 
   it 'probar name y public con un objeto' do
@@ -189,10 +184,12 @@ describe 'Aspect condiciones' do
       def bario
       end
     end
+    expected_methods = MiClase.private_instance_methods(true) + MiClase.public_instance_methods(true)
+    expected_methods += MiModulo.private_instance_methods(true) + MiModulo.public_instance_methods(true)
     expect(
         Aspects.on(MiClase, MiModulo) do
           where neg(name(/bar/))
-        end).to eq("Me pasaste MiClase, MiModulo y #{Aspects.name(/.*/) - [:bar, :bario]}")
+        end).to eq("Me pasaste MiClase, MiModulo y #{expected_methods - [:bar, :bario]}")
   end
 
   it 'probar la negacion de is_public' do
@@ -254,29 +251,29 @@ end
 describe 'Aspect parseo de regex y demaces' do
 
   it 'obtener origen de varias regex' do
-    expect(Module.get_origin_by_multiple_regex([/Class/, /Object/])).to eq([Class, NilClass, TrueClass, FalseClass, Object, BasicObject, ObjectSpace])
+    expect(Aspects.send(:_get_origin_by_multiple_regex, ([/Class/, /Object/]))).to eq([Class, NilClass, TrueClass, FalseClass, Object, BasicObject, ObjectSpace])
   end
   it 'obtener nada con regex que no matchea' do
-    expect(Module.get_origin_by_multiple_regex([/CACA/])).to eq([])
+    expect(Aspects.send(:_get_origin_by_multiple_regex, ([/CACA/]))).to eq([])
   end
 
   it 'obtener origen de varias regex repetidas' do
-    expect(Module.get_origin_by_multiple_regex([/Class/, /Class/])).to eq([Class, NilClass, TrueClass, FalseClass])
+    expect(Aspects.send(:_get_origin_by_multiple_regex, ([/Class/, /Class/]))).to eq([Class, NilClass, TrueClass, FalseClass])
   end
 
   it 'obtener origen de una regex' do
-    expect(Module.get_origin_by_regex(/Class/)).to eq([Class, NilClass, TrueClass, FalseClass])
+    expect(Aspects.send(:_get_origin_by_regex, (/Class/))).to eq([Class, NilClass, TrueClass, FalseClass])
   end
 
   it 'obtener origen de una regex' do
-    expect(Module.get_origin_by_regex(/Class/)).to eq([Class, NilClass, TrueClass, FalseClass])
+    expect(Aspects.send(:_get_origin_by_regex, (/Class/))).to eq([Class, NilClass, TrueClass, FalseClass])
   end
 
   it 'obtener simbolos de una regex' do
-    expect(Module._get_class_symbol_by_regex(/Class/)).to eq([:Class, :NilClass, :TrueClass, :FalseClass])
+    expect(Aspects.send(:_get_class_symbol_by_regex, (/Class/))).to eq([:Class, :NilClass, :TrueClass, :FalseClass])
   end
 
   it 'obtener ningun simbolo porque no matcheo la regex' do
-    expect(Module._get_class_symbol_by_regex(/Saraza/)).to eq([])
+    expect(Aspects.send(:_get_class_symbol_by_regex, (/Saraza/))).to eq([])
   end
 end
