@@ -44,6 +44,15 @@ class Aspects
     _get_origins_methods - metodos_condicion
   end
 
+  def self.transform(metodos, &transf)
+    self.instance_eval &transf
+    metodos
+  end
+
+  def self.inject(condition)
+    condition
+  end
+
   #Internal Methods
 
   def self._get_origins_methods

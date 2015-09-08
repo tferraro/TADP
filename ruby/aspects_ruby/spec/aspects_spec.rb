@@ -1,6 +1,28 @@
 require 'rspec'
 require_relative '../src/aspects'
 
+describe 'Aspect transformaciones' do
+  it 'probar transformacion base' do
+    class MiClase
+      def self.hace_algo(p1, p2)
+        p1 + '-' + p2
+      end
+
+      def self.hace_otra_cosa(p2, ppp)
+        p2 + ':' + ppp
+      end
+    end
+    expect(
+        Aspects.on(/^Mi.*/) do
+          transform(where has_parameters(1, /p2/)) do
+            inject(p2: 'bar')
+          end
+        end).to eq('Me pasaste MiClase y [:hace_algo, :hace_otra_cosa]')
+  end
+
+end
+
+
 describe 'Aspect condiciones' do
 
   before(:all) do
