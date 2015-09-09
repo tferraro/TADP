@@ -1,7 +1,24 @@
 require 'rspec'
 require_relative '../src/aspects'
 
-describe 'Aspect transformaciones' do
+describe 'Aspect transformaciones con ...' do
+  it 'probar transformacion ....' do
+    class Clase_Transformaciones
+      def hace_algo2(p1, p2)
+        p1 + '-' + p2
+      end
+    end
+
+    Aspects.on(Clase_Transformaciones) do
+      transform(where name(/hace_algo2/)) do
+        inject(p2: 'bar')
+      end
+    end
+    expect(Clase_Transformaciones.new.hace_algo2('hola', 'tarola')).to eq('hola-bar')
+  end
+end
+
+describe 'Aspect transformaciones con redirec_to' do
   it 'probar transformacion redirect_to instancia a instancia/instanciaS' do
     class Clase_Transformaciones
       def hace_algo(p1, p2)

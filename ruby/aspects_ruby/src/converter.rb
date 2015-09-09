@@ -48,7 +48,17 @@ class Aspect_Converter
   end
 
   def inject(condition)
-    condition
+    @source.each do |s|
+      s2 = s
+      s2 = s.bind(s.owner.new) if s.is_a? UnboundMethod
+      owner = s2.owner
+      parameters = s2.parameters.map { |_, p| p }
+      parameters = parameters.map { |p| (condition.has_key? p) ? condition[p] : p }
+      owner.send :define_method, s2.name.to_s do
+      |*args|
+        s2.call *(parameters.map { |s| (s.is_a? Symbol) ? args[parameters.index s] : s })
+      end
+    end
   end
 
   def redirect_to(new_origin)
@@ -64,7 +74,17 @@ class Aspect_Converter
   end
 
   def before(&block)
+    # BLAH, ESTO ES BASURA
     block.call
+    @source.each do |s|
+      define_metodo = (s.owner.is_a? Class) ? :define_method : :define_singleton_method
+      s2 = s
+      s2 = s.bind(s.owner.new) if s.is_a? UnboundMethod
+      s.owner.send define_metodo, s2.name.to_s do
+      |*param|
+        s2.call *param
+      end
+    end
   end
 
   def after(&block)
