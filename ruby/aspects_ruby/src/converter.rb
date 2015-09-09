@@ -43,8 +43,8 @@ class Aspect_Converter
   # Transformaciones <- Todavia no hace nada D:
 
   def transform(metodos, &transf)
-    self.instance_eval &transf
-    metodos
+    @source = metodos
+    instance_eval &transf
   end
 
   def inject(condition)
@@ -52,8 +52,14 @@ class Aspect_Converter
   end
 
   def redirect_to(new_origin)
-    new_origin
+    @source.each do |s|
+      new_origin.send(:define_singleton_method, s.name.to_s) do
+      |*param|
+        s.call *param
+      end
+    end
   end
+
   def before(&block)
     block.call
   end

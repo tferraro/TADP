@@ -2,24 +2,31 @@ require 'rspec'
 require_relative '../src/aspects'
 
 describe 'Aspect transformaciones' do
-  it 'probar transformacion base' do
-    class MiClase
+  it 'probar transformacion redirect_to instancia a instancia/instanciaS' do
+    class Clase_Transformaciones
       def hace_algo(p1, p2)
         p1 + '-' + p2
       end
+    end
+    class Tarola
+    end
 
-      def hace_otra_cosa(p2, ppp)
-        p2 + ':' + ppp
+    a = Tarola.new
+    b = Tarola.new
+
+    Aspects.on(Clase_Transformaciones.new) do
+      transform(where name(/hace_algo/)) do
+        redirect_to(a)
       end
     end
-    expect(
-        Aspects.on(/^Mi.*/) do
-          transform(where has_parameters(1, /p2/)) do
-            inject(p2: 'bar')
-          end
-        end).to eq('Me pasaste MiClase y [:hace_algo, :hace_otra_cosa]')
+    expect(a.hace_algo('hola', 'tarola')).to eq('hola-tarola')
+    begin
+      b.hace_algo('hola', 'tarola')
+      fail 'no exception raised'
+    rescue NoMethodError
+      'Funco!'
+    end
   end
-
 end
 
 
@@ -33,7 +40,8 @@ describe 'Aspect condiciones' do
 
     end
     # Estos metodos no impota lo que haga, si hago el mismo algoritmo adentro de Aspect::Aspect_Converter no aparecen, pero lo hago aca y saltan siempre. CON EL MISMO CODIGO
-    @array_loco = [:is_a?, :enum_for, :==, :equal?, :__send__, :__id__, :initialize_clone, :format, :fail, :block_given?, :fork, :gem_original_require, :singleton_method_removed, :singleton_method_undefined]
+    @array_loco = [:is_a?, :enum_for, :==, :equal?, :__send__, :__id__, :initialize_clone, :format, :fail, :block_given?, :gem_original_require, :singleton_method_removed, :singleton_method_undefined]
+    #@aray_loco << :fork
   end
 
   it 'probar condiciones de visibilidad is_public y name' do
