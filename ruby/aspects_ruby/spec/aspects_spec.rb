@@ -16,6 +16,23 @@ describe 'Aspect transformaciones con ...' do
     end
     expect(Clase_Transformaciones.new.hace_algo2('hola', 'tarola')).to eq('hola-bar')
   end
+
+  it 'probar transformacion ....' do
+    class Clase_Transformaciones
+      def hace_algo2(p1, p2)
+        p1 + '-' + p2
+      end
+    end
+
+    Aspects.on(Clase_Transformaciones) do
+      transform(where name(/hace_algo2/)) do
+        inject(p2: proc { |_, mensaje, arg_anterior|
+                 "bar(#{mensaje}->#{arg_anterior})"
+               })
+      end
+    end
+    expect(Clase_Transformaciones.new.hace_algo2('foo', 'foo')).to eq('foo-bar(hace_algo2->foo)')
+  end
 end
 
 describe 'Aspect transformaciones con redirec_to' do

@@ -53,10 +53,17 @@ class Aspect_Converter
       s2 = s.bind(s.owner.new) if s.is_a? UnboundMethod
       owner = s2.owner
       parameters = s2.parameters.map { |_, p| p }
-      parameters = parameters.map { |p| (condition.has_key? p) ? condition[p] : p }
-      owner.send :define_method, s2.name.to_s do
-      |*args|
-        s2.call *(parameters.map { |s| (s.is_a? Symbol) ? args[parameters.index s] : s })
+      parameters2 = parameters.map { |p| (condition.has_key? p) ? condition[p] : p }
+      #Receptor=owner; Mensaje=s2 ArgAnt = ??
+      owner.send :define_method, s2.name.to_s do |*args|
+        parameters2 = parameters2.map do |p|
+          if p.is_a? Proc
+            p.call(owner, s2.name.to_s, args[parameters.index (parameters - parameters2).first])
+          else
+            p
+          end
+        end
+        s2.call *(parameters2.map { |sym| (sym.is_a? Symbol) ? args[parameters2.index sym] : sym })
       end
     end
   end
