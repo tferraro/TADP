@@ -27,6 +27,35 @@ describe 'Aspect transformaciones' do
       'Funco!'
     end
   end
+
+  it 'probar transformacion redirect_to instanciaS a instancia' do
+    a = Tarola.new
+    b = Tarola.new
+
+    Aspects.on(Clase_Transformaciones) do
+      transform(where name(/hace_algo/)) do
+        redirect_to(a)
+      end
+    end
+    expect(a.hace_algo('hola', 'tarola')).to eq('hola-tarola')
+    begin
+      b.hace_algo('hola', 'tarola')
+      fail 'no exception raised'
+    rescue NoMethodError
+      'Funco!'
+    end
+  end
+
+  it 'probar transformacion redirect_to instanciaS a instanciaS' do
+
+    Aspects.on(Clase_Transformaciones) do
+      transform(where name(/hace_algo/)) do
+        redirect_to(Tarola)
+      end
+    end
+    #expect(Tarola.hace_algo('hola', 'tarola')).to eq('hola-tarola')
+    expect(Tarola.new.hace_algo('hola', 'tarola')).to eq('hola-tarola')
+  end
 end
 
 
