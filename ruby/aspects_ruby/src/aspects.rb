@@ -8,19 +8,21 @@ class Aspects
     _validar_argumentos(objetos, condicion)
     @converter.origins = _convertir_a_origenes_validos(objetos)
     metodos = @converter.instance_eval &condicion
-    "Me pasaste #{_convertir_a_origenes_validos(objetos).join(', ')} y #{metodos.map { |_, m| m.name }}"
+
+    # Para chequear que devuelve
+    metodos = metodos.map { |_, m| m.nil? ? nil : m.name } unless metodos.nil?
+    "Me pasaste #{_convertir_a_origenes_validos(objetos).join(', ')} y #{metodos}"
   end
 
   #Internal Methods
 
   def self._validar_argumentos(objetos, condicion)
-    raise ArgumentError, 'wrong number of arguments (0 for +1)' if condicion.nil?
-    raise ArgumentError, 'origen vacio' if objetos.empty?
+    raise ArgumentError, 'wrong number of arguments (0 for +1)' if condicion.nil? || objetos.empty?
   end
 
   def self._convertir_a_origenes_validos(objetos)
     origenes_regex = _get_origin_by_multiple_regex(objetos.get_regexp)
-    raise ArgumentError, 'origen vacio' if !objetos.get_regexp.empty? && origenes_regex.empty?
+    raise ArgumentError, 'origen vacio' if objetos.get_neg_regexp.empty? && origenes_regex.empty?
     objetos.get_neg_regexp + origenes_regex
   end
 

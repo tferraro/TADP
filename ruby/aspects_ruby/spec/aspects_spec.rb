@@ -4,7 +4,7 @@ require_relative '../src/aspects'
 describe 'Aspect transformaciones con before, after e instead_of' do
 
   # TODO: Falta probar bien los ejemplos del enunciado
-  it 'probar after en UNA instancia' do
+  it 'probar before en UNA instancia' do
     class Clase_Transformaciones
       def hace_algo_x(p2)
         p2
@@ -54,7 +54,7 @@ describe 'Aspect transformaciones con before, after e instead_of' do
     expect(Clase_Transformaciones.new.hace_algo_x('hola')).to eq('Agregue algo mas a: hola')
   end
 
-  it 'probar after en todas las instancias' do
+  it 'probar after en UNa instancia' do
     class Clase_Transformaciones
       def hace_algo_x(p2)
         p2
@@ -326,11 +326,11 @@ describe 'Aspect condiciones' do
         end).to eq('Me pasaste MiClase y [:pepita]')
     expect(
         Aspects.on(MiClase) do
-          where has_parameters(4, opcional)
+          where has_parameters(4, optional)
         end).to eq('Me pasaste MiClase y [:pepita2]')
     expect(
         Aspects.on(MiClase) do
-          where has_parameters(4, requerido)
+          where has_parameters(4, mandatory)
         end).to eq('Me pasaste MiClase y [:pepita]')
     expect(
         Aspects.on(MiClase) do
@@ -442,7 +442,7 @@ describe 'Aspect origenes' do
   end
 
   it 'falla por no pasarle orgien' do
-    expect { Aspects.on { 'hola' } }.to raise_error(ArgumentError, 'origen vacio')
+    expect { Aspects.on { 'hola' } }.to raise_error(ArgumentError, 'wrong number of arguments (0 for +1)')
   end
 
   it 'acepta regex de una clase que existe' do

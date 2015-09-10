@@ -28,11 +28,11 @@ class Aspect_Converter
     origins.map { |o| _get_origin_methods(o, cant, tipo, regex) }.flatten_lvl_one_unique
   end
 
-  def requerido
+  def mandatory
     :req
   end
 
-  def opcional
+  def optional
     :opt
   end
 
