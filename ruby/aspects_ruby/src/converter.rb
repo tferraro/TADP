@@ -69,11 +69,12 @@ class Aspect_Converter
   end
 
   def redirect_to(new_origin)
-    define_metodo = (new_origin.is_a? Class) ? :define_method : :define_singleton_method
+    get = (new_origin.is_a? Class) ? :instance_method : :method
     @source.each do |owner, s|
-      s2 = s
-      s2 = s.bind(owner.new) if s.is_a? UnboundMethod
-      new_origin.send define_metodo, s2.name.to_s do
+      define_metodo = (owner.is_a? Class) ? :define_method : :define_singleton_method
+      s2 = new_origin.send get, s.name
+      s2 = s2.bind(new_origin.new) if s2.is_a? UnboundMethod
+      owner.send define_metodo, s2.name.to_s do
       |*param|
         s2.call *param
       end

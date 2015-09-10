@@ -208,4 +208,24 @@ describe 'Tests sobre Transformaciones' do
     expect(MiClase.new.hace_algo('foo', 'foo')).to eq('foo-bar(hace_algo->foo)')
   end
 
+  it 'Redireccion' do
+    class A
+      def saludar(x)
+        'Hola, ' + x
+      end
+    end
+    class B
+      def saludar(x)
+        'Adiosin, ' + x
+      end
+    end
+
+    Aspects.on A do
+      transform(where name(/saludar/)) do
+        redirect_to(B.new)
+      end
+    end
+    expect(A.new.saludar('Mundo')).to eq('Adiosin, Mundo')
+  end
+
 end
