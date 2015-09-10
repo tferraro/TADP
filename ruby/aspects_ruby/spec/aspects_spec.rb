@@ -2,37 +2,73 @@ require 'rspec'
 require_relative '../src/aspects'
 
 describe 'Aspect transformaciones con before, after e instead_of' do
+  # TODO: Falta probar bien los ejemplos del enunciado
   it 'probar before en todas las instancias' do
     class Clase_Transformaciones
-      def hace_algoX(p2)
+      def hace_algo_x(p2)
         p2
       end
     end
     trans = Clase_Transformaciones.new
     Aspects.on(trans) do
-      transform(where name(/hace_algoX/)) do
+      transform(where name(/hace_algo_x/)) do
         before do |_, _, *args|
           args[0] += '!'
         end
       end
     end
-    expect(trans.hace_algoX('hola')).to eq('hola!')
-    expect(Clase_Transformaciones.new.hace_algoX('hola')).to eq('hola')
+    expect(trans.hace_algo_x('hola')).to eq('hola!')
+    expect(Clase_Transformaciones.new.hace_algo_x('hola')).to eq('hola')
   end
-  it 'probar before en UNA instancia' do
+
+  it 'probar after en UNA instancia' do
     class Clase_Transformaciones
-      def hace_algoX(p2)
+      def hace_algo_x(p2)
         p2
       end
     end
     Aspects.on(Clase_Transformaciones) do
-      transform(where name(/hace_algoX/)) do
+      transform(where name(/hace_algo_x/)) do
         before do |_, _, *args|
           args[0] += '!'
         end
       end
     end
-    expect(Clase_Transformaciones.new.hace_algoX('hola')).to eq('hola!')
+    expect(Clase_Transformaciones.new.hace_algo_x('hola')).to eq('hola!')
+  end
+
+  it 'probar after en UNA instancia' do
+    class Clase_Transformaciones
+      def hace_algo_x(p2)
+        p2
+      end
+    end
+    Aspects.on(Clase_Transformaciones) do
+      transform(where name(/hace_algo_x/)) do
+        after do |_, *args|
+          "Agregue algo mas a: #{args[0]}"
+        end
+      end
+    end
+    expect(Clase_Transformaciones.new.hace_algo_x('hola')).to eq('Agregue algo mas a: hola')
+  end
+
+  it 'probar after en todas las instancias' do
+    class Clase_Transformaciones
+      def hace_algo_x(p2)
+        p2
+      end
+    end
+    trans = Clase_Transformaciones.new
+    Aspects.on(trans) do
+      transform(where name(/hace_algo_x/)) do
+        after do |_, *args|
+          "Agregue algo mas a: #{args[0]}"
+        end
+      end
+    end
+    expect(trans.hace_algo_x('hola')).to eq('Agregue algo mas a: hola')
+    expect(Clase_Transformaciones.new.hace_algo_x('hola')).to eq('hola')
   end
 end
 
@@ -290,15 +326,15 @@ describe 'Aspect condiciones' do
   end
 
   it 'probar name y public con un objeto' do
-    class A
+    class Aaaaa
       def holis
         'holis'
       end
     end
-    a = A.new
+    a = Aaaaa.new
 
     def a.holas(param1, param2)
-      'holas'
+      "holas #{param1} #{param2}"
     end
 
     expect(
