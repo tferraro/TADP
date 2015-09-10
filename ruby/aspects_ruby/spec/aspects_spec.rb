@@ -1,6 +1,41 @@
 require 'rspec'
 require_relative '../src/aspects'
 
+describe 'Aspect transformaciones con before, after e instead_of' do
+  it 'probar before en todas las instancias' do
+    class Clase_Transformaciones
+      def hace_algoX(p2)
+        p2
+      end
+    end
+    trans = Clase_Transformaciones.new
+    Aspects.on(trans) do
+      transform(where name(/hace_algoX/)) do
+        before do |_, _, *args|
+          args[0] += '!'
+        end
+      end
+    end
+    expect(trans.hace_algoX('hola')).to eq('hola!')
+    expect(Clase_Transformaciones.new.hace_algoX('hola')).to eq('hola')
+  end
+  it 'probar before en UNA instancia' do
+    class Clase_Transformaciones
+      def hace_algoX(p2)
+        p2
+      end
+    end
+    Aspects.on(Clase_Transformaciones) do
+      transform(where name(/hace_algoX/)) do
+        before do |_, _, *args|
+          args[0] += '!'
+        end
+      end
+    end
+    expect(Clase_Transformaciones.new.hace_algoX('hola')).to eq('hola!')
+  end
+end
+
 describe 'Aspect transformaciones con inject' do
   it 'probar transformacion inject con reemplazo simple en todas las instancias' do
     class Clase_Transformaciones

@@ -82,14 +82,13 @@ class Aspect_Converter
 
   def before(&block)
     # BLAH, ESTO ES BASURA
-    block.call
-    @source.each do |_, s|
-      define_metodo = (s.owner.is_a? Class) ? :define_method : :define_singleton_method
+    @source.each do |owner, s|
+      define_metodo = (owner.is_a? Class) ? :define_method : :define_singleton_method
       s2 = s
-      s2 = s.bind(s.owner.new) if s.is_a? UnboundMethod
-      s.owner.send define_metodo, s2.name.to_s do
+      s2 = s.bind(owner.new) if s.is_a? UnboundMethod
+      owner.send define_metodo, s2.name.to_s do
       |*param|
-        s2.call *param
+        s2.call block.call(owner, nil, *param)
       end
     end
   end
@@ -106,8 +105,7 @@ class Aspect_Converter
   private
 
   def _get_origins_methods
-    r = origins.map { |o| _all_methods(o) }.flatten_lvl_one_unique
-    r
+    origins.map { |o| _all_methods(o) }.flatten_lvl_one_unique
   end
 
   def _get_methods_call_from(condition_array)
