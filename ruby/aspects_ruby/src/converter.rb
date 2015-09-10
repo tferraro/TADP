@@ -89,7 +89,9 @@ class Aspect_Converter
       s2 = s.bind(owner.new) if s.is_a? UnboundMethod
       owner.send define_metodo, s2.name.to_s do
       |*param|
-        s2.call block.call(owner, nil, *param)
+        s2 = s2.unbind.bind(self)
+        cont = proc {|_,_,*args| s2.call *args}
+        self.instance_exec self, cont, *param, &block
       end
     end
   end
@@ -102,7 +104,8 @@ class Aspect_Converter
       s2 = s.bind(owner.new) if s.is_a? UnboundMethod
       owner.send define_metodo, s2.name.to_s do
       |*param|
-        block.call owner, s2.call(*param)
+        previous = s2.unbind.bind(self).call *param
+        self.instance_exec self,previous, &block
       end
     end
   end
@@ -115,7 +118,8 @@ class Aspect_Converter
       s2 = s.bind(owner.new) if s.is_a? UnboundMethod
       owner.send define_metodo, s2.name.to_s do
       |*param|
-        block.call owner, *param
+        s2 = s2.unbind.bind(self)
+        self.instance_exec self, *param, &block
       end
     end
   end

@@ -228,4 +228,80 @@ describe 'Tests sobre Transformaciones' do
     expect(A.new.saludar('Mundo')).to eq('Adiosin, Mundo')
   end
 
+  it 'Injeccion de logica' do
+    class MiClase
+      attr_accessor :x
+
+      def m1(x, y)
+        x + y
+      end
+
+      def m2(x)
+        @x = x
+      end
+
+      def m3(x)
+        @x = x
+      end
+    end
+
+    Aspects.on MiClase do
+      transform(where name(/m1/)) do
+        before do |instance, cont, *args|
+          @x = 10
+          new_args = args.map { |arg| arg * 10 }
+          cont.call(self, nil, *new_args)
+        end
+      end
+      transform(where name(/m2/)) do
+        after do |instance, *args|
+          if @x > 100
+            2 * @x
+          else
+            @x
+          end
+        end
+      end
+      transform(where name(/m3/)) do
+        instead_of do |instance, *args|
+          @x = 123
+        end
+      end
+    end
+    instancia = MiClase.new
+    expect(instancia.m1(1, 2)).to eq(30)
+    expect(instancia.x).to eq(10)
+    instancia = MiClase.new
+    expect(instancia.m2(10)).to eq(10)
+    expect(instancia.m2(200)).to eq(400)
+    instancia = MiClase.new
+    instancia.m3(10)
+    expect(instancia.x).to eq(123)
+  end
+
+  # it 'Multiples Transformaciones' do
+  #   class A
+  #     def saludar(x)
+  #       'Hola, ' + x
+  #     end
+  #   end
+  #
+  #   class B
+  #     def saludar(x)
+  #       'Adiosin, ' + x
+  #     end
+  #   end
+  #
+  #   Aspects.on B do
+  #     transform(where name(/saludar/)) do
+  #       inject(x: 'Tarola')
+  #       before do |instance, cont, *args|
+  #         args[0] += '!'
+  #         cont.call(self, nil, *args)
+  #       end
+  #     end
+  #   end
+  #
+  #   expect(B.new.saludar('Mundo')).to eq('Adiosin, Tarola!')
+  # end
 end
