@@ -8,7 +8,7 @@ class Aspects
     _validar_argumentos(objetos, condicion)
     @converter.origins = _convertir_a_origenes_validos(objetos)
     metodos = @converter.instance_eval &condicion
-    "Me pasaste #{_convertir_a_origenes_validos(objetos).join(', ')} y #{metodos.map { |m| m.name }}"
+    "Me pasaste #{_convertir_a_origenes_validos(objetos).join(', ')} y #{metodos.map { |_, m| m.name }}"
   end
 
   #Internal Methods

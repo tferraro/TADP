@@ -8,7 +8,7 @@ class Aspect_Converter
   end
 
   def name(regex)
-    _get_origins_methods.select { |s| regex.match(s.name) }
+    _get_origins_methods.select { |_, s| regex.match(s.name) }
   end
 
   def is_private
@@ -48,14 +48,14 @@ class Aspect_Converter
   end
 
   def inject(condition)
-    @source.each do |s|
+    @source.each do |owner, s|
       s2 = s
-      s2 = s.bind(s.owner.new) if s.is_a? UnboundMethod
-      owner = s2.owner
+      s2 = s.bind(owner.new) if s.is_a? UnboundMethod
       parameters = s2.parameters.map { |_, p| p }
       parameters2 = parameters.map { |p| (condition.has_key? p) ? condition[p] : p }
       #Receptor=owner; Mensaje=s2 ArgAnt = ??
-      owner.send :define_method, s2.name.to_s do |*args|
+      define_metodo = (owner.is_a? Class) ? :define_method : :define_singleton_method
+      owner.send define_metodo, s2.name.to_s do |*args|
         parameters2 = parameters2.map do |p|
           if p.is_a? Proc
             p.call(owner, s2.name.to_s, args[parameters.index (parameters - parameters2).first])
@@ -70,9 +70,9 @@ class Aspect_Converter
 
   def redirect_to(new_origin)
     define_metodo = (new_origin.is_a? Class) ? :define_method : :define_singleton_method
-    @source.each do |s|
+    @source.each do |owner, s|
       s2 = s
-      s2 = s.bind(s.owner.new) if s.is_a? UnboundMethod
+      s2 = s.bind(owner.new) if s.is_a? UnboundMethod
       new_origin.send define_metodo, s2.name.to_s do
       |*param|
         s2.call *param
@@ -83,7 +83,7 @@ class Aspect_Converter
   def before(&block)
     # BLAH, ESTO ES BASURA
     block.call
-    @source.each do |s|
+    @source.each do |_, s|
       define_metodo = (s.owner.is_a? Class) ? :define_method : :define_singleton_method
       s2 = s
       s2 = s.bind(s.owner.new) if s.is_a? UnboundMethod
@@ -106,7 +106,8 @@ class Aspect_Converter
   private
 
   def _get_origins_methods
-    origins.map { |o| _all_methods(o) }.flatten_lvl_one_unique
+    r = origins.map { |o| _all_methods(o) }.flatten_lvl_one_unique
+    r
   end
 
   def _get_methods_call_from(condition_array)
@@ -120,22 +121,22 @@ class Aspect_Converter
     origins
         .map do |o|
       begin
-        o.send(sym_visibilidad.first).map { |s| o.instance_method(s) }
+        o.send(sym_visibilidad.first).map { |s| [o, o.instance_method(s)] }
       rescue
-        o.send(sym_visibilidad.last).map { |s| o.method(s) }
+        o.send(sym_visibilidad.last).map { |s| [o, o.method(s)] }
       end
     end
         .flatten_lvl_one_unique
   end
 
   def _all_methods(origin, type = true)
-    (origin.private_instance_methods(type) + origin.public_instance_methods(type)).map { |s| origin.instance_method(s) }
+    (origin.private_instance_methods(type) + origin.public_instance_methods(type)).map { |s| [origin, origin.instance_method(s)] }
   rescue
-    (origin.private_methods(type) + origin.public_methods(type)).map { |s| origin.method(s) }
+    (origin.private_methods(type) + origin.public_methods(type)).map { |s| [origin, origin.method(s)] }
   end
 
   def _get_origin_methods(origin, cant, tipo, regex)
-    _all_methods(origin).select do |s|
+    _all_methods(origin).select do |_, s|
       parametros = s.parameters
       unless tipo.nil?
         parametros = parametros.select { |t, _| t == tipo }
