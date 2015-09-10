@@ -81,7 +81,7 @@ class Aspect_Converter
   end
 
   def before(&block)
-    # BLAH, ESTO ES BASURA
+    # TODO: Duplicated code....BLAH, ESTO ES BASURA
     @source.each do |owner, s|
       define_metodo = (owner.is_a? Class) ? :define_method : :define_singleton_method
       s2 = s
@@ -94,6 +94,7 @@ class Aspect_Converter
   end
 
   def after(&block)
+    # TODO: Duplicated code....BLAH, ESTO ES BASURA
     @source.each do |owner, s|
       define_metodo = (owner.is_a? Class) ? :define_method : :define_singleton_method
       s2 = s
@@ -106,7 +107,16 @@ class Aspect_Converter
   end
 
   def instead_of(&block)
-    block.call
+    # TODO: Duplicated code....BLAH, ESTO ES BASURA
+    @source.each do |owner, s|
+      define_metodo = (owner.is_a? Class) ? :define_method : :define_singleton_method
+      s2 = s
+      s2 = s.bind(owner.new) if s.is_a? UnboundMethod
+      owner.send define_metodo, s2.name.to_s do
+      |*param|
+        block.call owner, *param
+      end
+    end
   end
 
   #Internal Methods
