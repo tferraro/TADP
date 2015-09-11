@@ -27,7 +27,7 @@ class Aspect_Converter
       regex = tipo
       tipo = nil
     end
-    origins.map { |o| _get_origin_methods(o, cant, tipo, regex) }.flatten_lvl_one_unique
+    origins.map { |o| _get_origin_methods(o, cant, tipo, regex) }.flatten(1)
   end
 
   def mandatory
@@ -51,13 +51,11 @@ class Aspect_Converter
 
   def inject(condition)
     @source.each do |m|
-      s2 = m.metodo
-      s2 = s2.bind(m.owner.new) if s2.is_a? UnboundMethod
+      s2 = m.binded_method
       parameters = s2.parameters.map { |_, p| p }
       parameters2 = parameters.map { |p| (condition.has_key? p) ? condition[p] : p }
       #Receptor=owner; Mensaje=s2 ArgAnt = ??
-      define_metodo = (m.owner.is_a? Class) ? :define_method : :define_singleton_method
-      m.owner.send define_metodo, s2.name.to_s do |*args|
+      m.send_owner s2.name.to_s do |*args|
         parameters2 = parameters2.map do |p|
           if p.is_a? Proc
             p.call(m.owner, s2.name.to_s, args[parameters.index (parameters - parameters2).first])
@@ -73,10 +71,9 @@ class Aspect_Converter
   def redirect_to(new_origin)
     get = (new_origin.is_a? Class) ? :instance_method : :method
     @source.each do |m|
-      define_metodo = (m.owner.is_a? Class) ? :define_method : :define_singleton_method
       s2 = new_origin.send get, m.symbol
       s2 = s2.bind(new_origin.new) if s2.is_a? UnboundMethod
-      m.owner.send define_metodo, s2.name.to_s do
+      m.send_owner s2.name.to_s do
       |*param|
         s2.call *param
       end
@@ -86,13 +83,9 @@ class Aspect_Converter
   def before(&block)
     # TODO: Duplicated code....BLAH, ESTO ES BASURA
     @source.each do |m|
-      define_metodo = (m.owner.is_a? Class) ? :define_method : :define_singleton_method
-      s2 = m.metodo
-      s2 = s2.bind(m.owner.new) if s2.is_a? UnboundMethod
-      m.owner.send define_metodo, s2.name.to_s do
+      m.send_owner m.binded_method.name.to_s do
       |*param|
-        s2 = s2.unbind.bind(self)
-        cont = proc { |_, _, *args| s2.call *args }
+        cont = proc { |_, _, *args| m.rebind_method(self).call *args }
         self.instance_exec self, cont, *param, &block
       end
     end
@@ -101,12 +94,9 @@ class Aspect_Converter
   def after(&block)
     # TODO: Duplicated code....BLAH, ESTO ES BASURA
     @source.each do |m|
-      define_metodo = (m.owner.is_a? Class) ? :define_method : :define_singleton_method
-      s2 = m.metodo
-      s2 = s2.bind(m.owner.new) if s2.is_a? UnboundMethod
-      m.owner.send define_metodo, s2.name.to_s do
+      m.send_owner m.binded_method.name.to_s do
       |*param|
-        previous = s2.unbind.bind(self).call *param
+        previous = m.rebind_method(self).call *param
         self.instance_exec self, previous, &block
       end
     end
@@ -115,12 +105,8 @@ class Aspect_Converter
   def instead_of(&block)
     # TODO: Duplicated code....BLAH, ESTO ES BASURA
     @source.each do |m|
-      define_metodo = (m.owner.is_a? Class) ? :define_method : :define_singleton_method
-      s2 = m.metodo
-      s2 = s2.bind(m.owner.new) if s2.is_a? UnboundMethod
-      m.owner.send define_metodo, s2.name.to_s do
+      m.send_owner m.binded_method.name.to_s do
       |*param|
-        s2 = s2.unbind.bind(self)
         self.instance_exec self, *param, &block
       end
     end
@@ -130,7 +116,7 @@ class Aspect_Converter
   private
 
   def _get_origins_methods
-    origins.map { |o| _all_methods(o) }.flatten_lvl_one_unique
+    origins.map { |o| _all_methods(o) }.flatten(1)
   end
 
   def _get_methods_call_from(condition_array)
@@ -149,7 +135,7 @@ class Aspect_Converter
         o.send(sym_visibilidad.last).map { |s| Method_Aspect.new o, o.method(s) }
       end
     end
-        .flatten_lvl_one_unique
+        .flatten(1)
   end
 
   def _all_methods(origin, type = true)
@@ -175,11 +161,11 @@ class Aspect_Converter
     aplastado.each do |elem|
       if aspects_methods.all? do |array|
         array.any? do |e2|
-          e2.is_same? elem
+          e2.same_atributes? elem
         end
       end
         unless resultado.any? do |r|
-          r.is_same? elem
+          r.same_atributes? elem
         end
           resultado << elem
         end
@@ -189,14 +175,14 @@ class Aspect_Converter
   end
 
   def _remove_aspect_methods(original, duplicados)
-    original.select do |o|
-      !duplicados.any? {|d| d.is_same? o}
+   original.select do |o|
+      !duplicados.any? {|d| d.same_atributes? o}
     end
   end
 end
 
 
-# TODO: Sacar todas las definiciones en Module y Object posibles.
+# TODO: Tratar de no definir metodos en Array
 
 class Array
   def get_regexp
@@ -209,15 +195,5 @@ class Array
 
   def get_neg_regexp
     self - get_regexp
-  end
-
-  def flatten_lvl_one_unique
-    self.flatten(1).uniq
-  end
-
-  def intersect_multi_arrays
-    every_element = self.flatten_lvl_one_unique
-    self.each { |a| every_element = every_element & a }
-    every_element
   end
 end

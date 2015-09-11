@@ -35,7 +35,7 @@ class Aspects
   end
 
   def self._get_origin_by_multiple_regex(regex)
-    regex.map { |r| _get_origin_by_regex(r) }.flatten_lvl_one_unique
+    regex.map { |r| _get_origin_by_regex(r) }.flatten(1).uniq
   end
 
   private_class_method :_validar_argumentos
