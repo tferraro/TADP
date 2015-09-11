@@ -9,6 +9,11 @@ class Aspect_Converter
     _intersect_methods(condiciones)
   end
 
+  def transform(metodos, &transf)
+    @source = metodos
+    metodos.each { |m| m.instance_eval &transf }
+  end
+
   def name(regex)
     _get_origins_methods.select { |m| m.method_match(regex) }
   end
@@ -42,16 +47,7 @@ class Aspect_Converter
     _remove_aspect_methods(_get_origins_methods, metodos_condicion)
   end
 
-  # Transformaciones <- Todavia no hace nada D:
-
-  def transform(metodos, &transf)
-    @source = metodos
-    metodos.each { |m| m.instance_eval &transf}
-    #instance_eval &transf
-  end
-
-  #Internal Methods
-  private
+  private #Internal Methods
 
   def _redefine_aspect(aspect, symbol, &behaviour)
     aspect.send_owner symbol, &behaviour
@@ -63,7 +59,7 @@ class Aspect_Converter
 
   def _get_methods_call_from(condition_array)
     condition_array
-        .get_symbols
+        .f.select { |o| o.is_a? (Symbol) }
         .select { |s| [is_private, is_public].include? s }
         .first
   end
@@ -120,22 +116,5 @@ class Aspect_Converter
     original.select do |o|
       !duplicados.any? { |d| d.same_atributes? o }
     end
-  end
-end
-
-
-# TODO: Tratar de no definir metodos en Array
-
-class Array
-  def get_regexp
-    self.select { |o| o.is_a? (Regexp) }
-  end
-
-  def get_symbols
-    self.select { |o| o.is_a? (Symbol) }
-  end
-
-  def get_neg_regexp
-    self - get_regexp
   end
 end

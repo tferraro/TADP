@@ -279,29 +279,26 @@ describe 'Tests sobre Transformaciones' do
     expect(instancia.x).to eq(123)
   end
 
-  # it 'Multiples Transformaciones' do
-  #   class A
-  #     def saludar(x)
-  #       'Hola, ' + x
-  #     end
-  #   end
-  #
-  #   class B
-  #     def saludar(x)
-  #       'Adiosin, ' + x
-  #     end
-  #   end
-  #
-  #   Aspects.on B do
-  #     transform(where name(/saludar/)) do
-  #       inject(x: 'Tarola')
-  #       before do |instance, cont, *args|
-  #         args[0] += '!'
-  #         cont.call(self, nil, *args)
-  #       end
-  #     end
-  #   end
-  #
-  #   expect(B.new.saludar('Mundo')).to eq('Adiosin, Tarola!')
-  # end
+  it 'Multiples Transformaciones' do
+    class A
+      def saludar(x)
+        'Hola, ' + x
+      end
+    end
+
+    class B
+      def saludar(x)
+        'Adiosin, ' + x
+      end
+    end
+
+    Aspects.on B do
+      transform(where name(/saludar/)) do
+        inject(x: 'Tarola')
+        redirect_to (A.new)
+      end
+    end
+
+    expect(B.new.saludar('Mundo')).to eq('Hola, Mundo')
+  end
 end

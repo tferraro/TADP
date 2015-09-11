@@ -21,9 +21,11 @@ class Aspects
   end
 
   def self._convertir_a_origenes_validos(objetos)
-    origenes_regex = _get_origin_by_multiple_regex(objetos.get_regexp)
-    raise ArgumentError, 'origen vacio' if objetos.get_neg_regexp.empty? && origenes_regex.empty?
-    objetos.get_neg_regexp + origenes_regex
+    obj_regex = objetos.select { |o| o.is_a? (Regexp) }
+    obj_not_regex = objetos - obj_regex
+    origenes_regex = _get_origin_by_multiple_regex(obj_regex)
+    raise ArgumentError, 'origen vacio' if obj_not_regex.empty? && origenes_regex.empty?
+    obj_not_regex + origenes_regex
   end
 
   def self._get_class_symbol_by_regex(regex)

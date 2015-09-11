@@ -28,19 +28,20 @@ class Method_Aspect
   end
 
   def send_owner(symbol, &behaviour)
-    @owner.send define_metodo, symbol, &behaviour
+    @owner.send _define_metodo, symbol, &behaviour
   end
+
+  # Transformaciones
 
   def inject(condition)
     this = self
-    s2 = self.binded_method
     parameters = binded_method.parameters.map { |_, p| p }
     parameters2 = parameters.map { |p| (condition.has_key? p) ? condition[p] : p }
     #Receptor=owner; Mensaje=s2 ArgAnt = ??
-    _redefine_aspect s2.name.to_s do |*args|
+    _redefine_aspect this.binded_method.name.to_s do |*args|
       parameters2 = parameters2.map do |p|
         if p.is_a? Proc
-          p.call(this.owner, s2.name.to_s, args[parameters.index (parameters - parameters2).first])
+          p.call(this.owner, this.binded_method.name.to_s, args[parameters.index (parameters - parameters2).first])
         else
           p
         end
@@ -81,14 +82,13 @@ class Method_Aspect
     end
   end
 
-  def _redefine_aspect(symbol, &behaviour)
-    self.send_owner symbol, &behaviour
-  end
-
   private
-  def define_metodo
+
+  def _define_metodo
     (@owner.is_a? Class) ? :define_method : :define_singleton_method
   end
 
-
+  def _redefine_aspect(symbol, &behaviour)
+    self.send_owner symbol, &behaviour
+  end
 end
