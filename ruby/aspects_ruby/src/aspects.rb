@@ -10,7 +10,7 @@ class Aspects
     metodos = @converter.instance_eval &condicion
 
     # Para chequear que devuelve
-    metodos = metodos.map { |_, m| m.nil? ? nil : m.name } unless metodos.nil?
+    metodos = metodos.map { |m| m.nil? ? nil : m.symbol } unless metodos.nil?
     "Me pasaste #{_convertir_a_origenes_validos(objetos).join(', ')} y #{metodos}"
   end
 

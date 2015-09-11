@@ -3,7 +3,6 @@ require_relative '../src/aspects'
 
 describe 'Aspect transformaciones con before, after e instead_of' do
 
-  # TODO: Falta probar bien los ejemplos del enunciado
   it 'probar before en UNA instancia' do
     class Clase_Transformaciones
       def hace_algo_x(p2)
@@ -378,23 +377,23 @@ describe 'Aspect condiciones' do
   end
 
   it 'probar la negacion de name' do
-    class MiClase
+    class M2iClase
       def bar
       end
 
       def foo
       end
     end
-    module MiModulo
+    module M2iModulo
       def bario
       end
     end
-    expected_methods = MiClase.private_instance_methods(true) + MiClase.public_instance_methods(true)
-    expected_methods += MiModulo.private_instance_methods(true) + MiModulo.public_instance_methods(true)
+    expected_methods = M2iClase.private_instance_methods(true) + M2iClase.public_instance_methods(true)
+    expected_methods += M2iModulo.private_instance_methods(true) + M2iModulo.public_instance_methods(true)
     expect(
-        Aspects.on(MiClase, MiModulo) do
+        Aspects.on(M2iClase, M2iModulo) do
           where neg(name(/bar/))
-        end).to eq("Me pasaste MiClase, MiModulo y #{expected_methods - [:bar, :bario] - @array_loco}")
+        end).to eq("Me pasaste M2iClase, M2iModulo y #{expected_methods - [:bar, :bario] - @array_loco}")
   end
 
   it 'probar la negacion de is_public' do
@@ -428,7 +427,7 @@ describe 'Aspect origenes' do
 
   it 'chequear parametros pasados' do
     mi_objeto = MiClase.new
-    expect(Aspects.on(MiClase, mi_objeto, MiModulo) { [[MiClase, MiClase.instance_method(:class)]] }).to eq("Me pasaste MiClase, #{mi_objeto}, MiModulo y [:class]")
+    expect(Aspects.on(MiClase, mi_objeto, MiModulo) { [Method_Aspect.new(MiClase, MiClase.instance_method(:class))] }).to eq("Me pasaste MiClase, #{mi_objeto}, MiModulo y [:class]")
   end
 
   it 'falla por no pasarle un bloque' do
@@ -440,15 +439,15 @@ describe 'Aspect origenes' do
   end
 
   it 'acepta regex de una clase que existe' do
-    expect(Aspects.on(/MiClase/) { [[MiClase, MiClase.instance_method(:class)]] }).to eq ('Me pasaste MiClase y [:class]')
+    expect(Aspects.on(/MiClase/) { [Method_Aspect.new(MiClase, MiClase.instance_method(:class))] }).to eq ('Me pasaste MiClase y [:class]')
   end
 
   it 'falla regex de una clase que no existe' do
-    expect { Aspects.on(/Saraza/) { [[MiClase, MiClase.instance_method(:class)]] } }.to raise_error(ArgumentError, 'origen vacio')
+    expect { Aspects.on(/Saraza/) { [Method_Aspect.new(MiClase, MiClase.instance_method(:class))] } }.to raise_error(ArgumentError, 'origen vacio')
   end
 
   it 'acepta regex parcial de una clase que existe' do
-    expect(Aspects.on(/^Mi.*/) { [[MiClase, MiClase.instance_method(:class)]] }).to eq ('Me pasaste MiClase, MiModulo y [:class]')
+    expect(Aspects.on(/^Mi.*/) { [Method_Aspect.new(MiClase, MiClase.instance_method(:class))] }).to eq ('Me pasaste MiClase, MiModulo y [:class]')
   end
 end
 
