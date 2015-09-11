@@ -46,74 +46,16 @@ class Aspect_Converter
 
   def transform(metodos, &transf)
     @source = metodos
-    instance_eval &transf
-  end
-
-  def inject(condition)
-    @source.each do |m|
-      s2 = m.binded_method
-      parameters = s2.parameters.map { |_, p| p }
-      parameters2 = parameters.map { |p| (condition.has_key? p) ? condition[p] : p }
-      #Receptor=owner; Mensaje=s2 ArgAnt = ??
-      m.send_owner s2.name.to_s do |*args|
-        parameters2 = parameters2.map do |p|
-          if p.is_a? Proc
-            p.call(m.owner, s2.name.to_s, args[parameters.index (parameters - parameters2).first])
-          else
-            p
-          end
-        end
-        s2.call *(parameters2.map { |sym| (sym.is_a? Symbol) ? args[parameters2.index sym] : sym })
-      end
-    end
-  end
-
-  def redirect_to(new_origin)
-    get = (new_origin.is_a? Class) ? :instance_method : :method
-    @source.each do |m|
-      s2 = new_origin.send get, m.symbol
-      s2 = s2.bind(new_origin.new) if s2.is_a? UnboundMethod
-      m.send_owner s2.name.to_s do
-      |*param|
-        s2.call *param
-      end
-    end
-  end
-
-  def before(&block)
-    # TODO: Duplicated code....BLAH, ESTO ES BASURA
-    @source.each do |m|
-      m.send_owner m.binded_method.name.to_s do
-      |*param|
-        cont = proc { |_, _, *args| m.rebind_method(self).call *args }
-        self.instance_exec self, cont, *param, &block
-      end
-    end
-  end
-
-  def after(&block)
-    # TODO: Duplicated code....BLAH, ESTO ES BASURA
-    @source.each do |m|
-      m.send_owner m.binded_method.name.to_s do
-      |*param|
-        previous = m.rebind_method(self).call *param
-        self.instance_exec self, previous, &block
-      end
-    end
-  end
-
-  def instead_of(&block)
-    # TODO: Duplicated code....BLAH, ESTO ES BASURA
-    @source.each do |m|
-      m.send_owner m.binded_method.name.to_s do
-      |*param|
-        self.instance_exec self, *param, &block
-      end
-    end
+    metodos.each { |m| m.instance_eval &transf}
+    #instance_eval &transf
   end
 
   #Internal Methods
   private
+
+  def _redefine_aspect(aspect, symbol, &behaviour)
+    aspect.send_owner symbol, &behaviour
+  end
 
   def _get_origins_methods
     origins.map { |o| _all_methods(o) }.flatten(1)
@@ -175,8 +117,8 @@ class Aspect_Converter
   end
 
   def _remove_aspect_methods(original, duplicados)
-   original.select do |o|
-      !duplicados.any? {|d| d.same_atributes? o}
+    original.select do |o|
+      !duplicados.any? { |d| d.same_atributes? o }
     end
   end
 end
