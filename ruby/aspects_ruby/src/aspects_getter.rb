@@ -1,6 +1,6 @@
-require_relative '../src/aspects_method'
+require_relative '../src/aspects_mutage'
 
-class Aspect_Converter
+class Aspects_Getter
   attr_accessor :origins
 
   # Condiciones
@@ -68,18 +68,18 @@ class Aspect_Converter
     origins
         .map do |o|
       begin
-        o.send(sym_visibilidad.first).map { |s| Method_Aspect.new o, o.instance_method(s) }
+        o.send(sym_visibilidad.first).map { |s| Aspects_Mutagen.new o, o.instance_method(s) }
       rescue
-        o.send(sym_visibilidad.last).map { |s| Method_Aspect.new o, o.method(s) }
+        o.send(sym_visibilidad.last).map { |s| Aspects_Mutagen.new o, o.method(s) }
       end
     end
         .flatten(1)
   end
 
   def _all_methods(origin, type = true)
-    (origin.private_instance_methods(type) + origin.public_instance_methods(type)).map { |s| Method_Aspect.new origin, origin.instance_method(s) }
+    (origin.private_instance_methods(type) + origin.public_instance_methods(type)).map { |s| Aspects_Mutagen.new origin, origin.instance_method(s) }
   rescue
-    (origin.private_methods(type) + origin.public_methods(type)).map { |s| Method_Aspect.new origin, origin.method(s) }
+    (origin.private_methods(type) + origin.public_methods(type)).map { |s| Aspects_Mutagen.new origin, origin.method(s) }
   end
 
   def _get_origin_methods(origin, cant, tipo, regex)

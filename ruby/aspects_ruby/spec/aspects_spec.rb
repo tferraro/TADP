@@ -236,7 +236,7 @@ describe 'Aspect condiciones' do
     end
     # Estos metodos no impota lo que haga, si hago el mismo algoritmo adentro de Aspect::Aspect_Converter no aparecen, pero lo hago aca y saltan siempre. CON EL MISMO CODIGO
     @array_loco = [:is_a?, :enum_for, :==, :equal?, :__send__, :__id__, :initialize_clone, :format, :fail, :block_given?, :gem_original_require, :singleton_method_removed, :singleton_method_undefined]
-    @array_loco << :fork
+    #@array_loco << :fork
   end
 
   it 'probar condiciones de visibilidad is_public y name' do
@@ -427,7 +427,7 @@ describe 'Aspect origenes' do
 
   it 'chequear parametros pasados' do
     mi_objeto = MiClase.new
-    expect(Aspects.on(MiClase, mi_objeto, MiModulo) { [Method_Aspect.new(MiClase, MiClase.instance_method(:class))] }).to eq("Me pasaste MiClase, #{mi_objeto}, MiModulo y [:class]")
+    expect(Aspects.on(MiClase, mi_objeto, MiModulo) { [Aspects_Mutagen.new(MiClase, MiClase.instance_method(:class))] }).to eq("Me pasaste MiClase, #{mi_objeto}, MiModulo y [:class]")
   end
 
   it 'falla por no pasarle un bloque' do
@@ -439,15 +439,15 @@ describe 'Aspect origenes' do
   end
 
   it 'acepta regex de una clase que existe' do
-    expect(Aspects.on(/MiClase/) { [Method_Aspect.new(MiClase, MiClase.instance_method(:class))] }).to eq ('Me pasaste MiClase y [:class]')
+    expect(Aspects.on(/MiClase/) { [Aspects_Mutagen.new(MiClase, MiClase.instance_method(:class))] }).to eq ('Me pasaste MiClase y [:class]')
   end
 
   it 'falla regex de una clase que no existe' do
-    expect { Aspects.on(/Saraza/) { [Method_Aspect.new(MiClase, MiClase.instance_method(:class))] } }.to raise_error(ArgumentError, 'origen vacio')
+    expect { Aspects.on(/Saraza/) { [Aspects_Mutagen.new(MiClase, MiClase.instance_method(:class))] } }.to raise_error(ArgumentError, 'origen vacio')
   end
 
   it 'acepta regex parcial de una clase que existe' do
-    expect(Aspects.on(/^Mi.*/) { [Method_Aspect.new(MiClase, MiClase.instance_method(:class))] }).to eq ('Me pasaste MiClase, MiModulo y [:class]')
+    expect(Aspects.on(/^Mi.*/) { [Aspects_Mutagen.new(MiClase, MiClase.instance_method(:class))] }).to eq ('Me pasaste MiClase, MiModulo y [:class]')
   end
 end
 

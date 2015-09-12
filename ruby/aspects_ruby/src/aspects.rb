@@ -1,8 +1,8 @@
-require_relative '../src/converter'
+require_relative '../src/aspects_getter'
 
 class Aspects
 
-  @converter = Aspect_Converter.new
+  @converter = Aspects_Getter.new
 
   def Aspects.on(*objetos, &condicion)
     _validar_argumentos(objetos, condicion)

@@ -1,4 +1,4 @@
-class Method_Aspect
+class Aspects_Mutagen
   attr_reader :owner, :metodo
 
   def initialize(owner, method)
@@ -34,19 +34,19 @@ class Method_Aspect
   # Transformaciones
 
   def inject(condition)
-    this = self
+    mutagen = self
     parameters = binded_method.parameters.map { |_, p| p }
     parameters2 = parameters.map { |p| (condition.has_key? p) ? condition[p] : p }
     #Receptor=owner; Mensaje=s2 ArgAnt = ??
-    _redefine_aspect this.binded_method.name.to_s do |*args|
+    _redefine_aspect mutagen.binded_method.name.to_s do |*args|
       parameters2 = parameters2.map do |p|
         if p.is_a? Proc
-          p.call(this.owner, this.binded_method.name.to_s, args[parameters.index (parameters - parameters2).first])
+          p.call(mutagen.owner, mutagen.binded_method.name.to_s, args[parameters.index (parameters - parameters2).first])
         else
           p
         end
       end
-      this.binded_method.call *(parameters2.map { |sym| (sym.is_a? Symbol) ? args[parameters2.index sym] : sym })
+      mutagen.binded_method.call *(parameters2.map { |sym| (sym.is_a? Symbol) ? args[parameters2.index sym] : sym })
     end
   end
 
@@ -60,24 +60,24 @@ class Method_Aspect
   end
 
   def before(&block)
-    this = self
-    _redefine_aspect this.binded_method.name.to_s do |*param|
-      cont = proc { |_, _, *args| this.rebind_method(self).call *args }
+    mutagen = self
+    _redefine_aspect mutagen.binded_method.name.to_s do |*param|
+      cont = proc { |_, _, *args| mutagen.rebind_method(self).call *args }
       self.instance_exec self, cont, *param, &block
     end
   end
 
   def after(&block)
-    this = self
-    _redefine_aspect this.binded_method.name.to_s do |*param|
-      previous = this.rebind_method(self).call *param
+    mutagen = self
+    _redefine_aspect mutagen.binded_method.name.to_s do |*param|
+      previous = mutagen.rebind_method(self).call *param
       self.instance_exec self, previous, &block
     end
   end
 
   def instead_of(&block)
-    this = self
-    _redefine_aspect this.binded_method.name.to_s do |*param|
+    mutagen = self
+    _redefine_aspect mutagen.binded_method.name.to_s do |*param|
       self.instance_exec self, *param, &block
     end
   end
