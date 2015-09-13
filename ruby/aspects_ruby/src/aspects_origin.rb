@@ -160,8 +160,8 @@ class Aspects_Getter
     :opt
   end
 
-  def neg(metodos_condicion)
-
+  def neg(block)
+    proc { |mutagen| !block.call mutagen }
   end
 end
 

@@ -107,7 +107,7 @@ describe 'Aspect condiciones' do
     expect(Aspects.on(KlaseLoca) { where(proc { |metodo| metodo.symbol == :holis }) }.first.metodo).to eq(KlaseLoca.instance_method(:holis))
   end
 
-  it 'Probamos el where-name' do
+  it 'Probamos el where-name-is_public' do
     klaseLoca = Class.new do
       def holis
 
@@ -121,7 +121,7 @@ describe 'Aspect condiciones' do
     expect(Aspects.on(klaseLoca) { where name(/holis/), is_public }.first.metodo).to eq(klaseLoca.instance_method(:holis))
   end
 
-  it 'Probamos el where-name' do
+  it 'Probamos el where-is_private' do
     klaseLoca = Class.new do
       def holis
 
@@ -133,5 +133,20 @@ describe 'Aspect condiciones' do
       end
     end
     expect(Aspects.on(klaseLoca) { where name(/holis/), is_private }.first.metodo).to eq(klaseLoca.instance_method(:holis2))
+  end
+
+
+  it 'Probamos el where-neg' do
+    klaseLoca = Class.new do
+      def holis
+
+      end
+
+      private
+      def holis2
+
+      end
+    end
+    expect(Aspects.on(klaseLoca) { where name(/holis/), neg(is_private) }.first.metodo).to eq(klaseLoca.instance_method(:holis))
   end
 end
