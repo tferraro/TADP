@@ -4,12 +4,12 @@ require_relative '../src/aspects'
 describe 'Aspect transformaciones con before, after e instead_of' do
 
   it 'probar before en UNA instancia' do
-    class Clase_Transformaciones
+    clase_Transformaciones = Class.new do
       def hace_algo_x(p2)
         p2
       end
     end
-    trans = Clase_Transformaciones.new
+    trans = clase_Transformaciones.new
     Aspects.on(trans) do
       transform(where name(/hace_algo_x/)) do
         before do |_, _, *args|
@@ -448,36 +448,5 @@ describe 'Aspect origenes' do
 
   it 'acepta regex parcial de una clase que existe' do
     expect(Aspects.on(/^Mi.*/) { [Aspects_Mutagen.new(MiClase, MiClase.instance_method(:class))] }).to eq ('Me pasaste MiClase, MiModulo y [:class]')
-  end
-end
-
-
-describe 'Aspect parseo de regex y demaces' do
-
-  it 'obtener origen de varias regex' do
-    expect(Aspects.send(:_get_origin_by_multiple_regex, ([/Class/, /Object/]))).to eq([Class, NilClass, TrueClass, FalseClass, Object, BasicObject, ObjectSpace])
-  end
-  it 'obtener nada con regex que no matchea' do
-    expect(Aspects.send(:_get_origin_by_multiple_regex, ([/CACA/]))).to eq([])
-  end
-
-  it 'obtener origen de varias regex repetidas' do
-    expect(Aspects.send(:_get_origin_by_multiple_regex, ([/Class/, /Class/]))).to eq([Class, NilClass, TrueClass, FalseClass])
-  end
-
-  it 'obtener origen de una regex' do
-    expect(Aspects.send(:_get_origin_by_regex, (/Class/))).to eq([Class, NilClass, TrueClass, FalseClass])
-  end
-
-  it 'obtener origen de una regex' do
-    expect(Aspects.send(:_get_origin_by_regex, (/Class/))).to eq([Class, NilClass, TrueClass, FalseClass])
-  end
-
-  it 'obtener simbolos de una regex' do
-    expect(Aspects.send(:_get_class_symbol_by_regex, (/Class/))).to eq([:Class, :NilClass, :TrueClass, :FalseClass])
-  end
-
-  it 'obtener ningun simbolo porque no matcheo la regex' do
-    expect(Aspects.send(:_get_class_symbol_by_regex, (/Saraza/))).to eq([])
   end
 end
