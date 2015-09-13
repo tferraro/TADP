@@ -18,7 +18,7 @@ describe 'Aspect transformaciones con before, after e instead_of' do
       end
     end
     expect(trans.hace_algo_x('hola')).to eq('hola!')
-    expect(Clase_Transformaciones.new.hace_algo_x('hola')).to eq('hola')
+    expect(clase_Transformaciones.new.hace_algo_x('hola')).to eq('hola')
   end
 
   it 'probar before en todas las instancias' do

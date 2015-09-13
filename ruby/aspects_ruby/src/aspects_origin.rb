@@ -1,5 +1,3 @@
-require_relative '../src/aspects_mutage'
-
 class Aspects_Origin_Converter
 
   def self.create_origins(sources)
@@ -41,23 +39,31 @@ class Aspect_Origin
   end
 
   def meth_publicos(type= true)
-    __meth_obtain__(sym_publicos(type))
+    __methods_obtain__(sym_publicos(type))
   end
 
   def meth_privados(type= true)
-    __meth_obtain__(sym_privados(type))
+    __methods_obtain__(sym_privados(type))
   end
 
   def definir_metodo(sym, &behaviour)
     @base.send sym_definir, sym, &behaviour
   end
 
-  def get_meth(sym)
+  def meth_obtain(sym)
+    method_check __get_meth__ sym
+  end
+
+  def __get_meth__(sym)
     @base.send sym_method, sym
   end
 
-  def __meth_obtain__(collection)
-    collection.map { |sym| method_check(get_meth sym) }
+  def __methods_obtain__(collection)
+    collection.map { |sym| meth_obtain sym }
+  end
+
+  def bind_me_to(method)
+    method.bind(bind_instancia)
   end
 
 end
@@ -87,6 +93,10 @@ class Aspect_Origin_Class < Aspect_Origin
   def conoce?(sym, visibility= false)
     @base.new.respond_to? sym, visibility
   end
+
+  def bind_instancia
+    @base.new
+  end
 end
 
 class Aspect_Origin_Instance < Aspect_Origin
@@ -114,10 +124,97 @@ class Aspect_Origin_Instance < Aspect_Origin
   def conoce?(sym, visibility= false)
     @base.respond_to? sym, visibility
   end
+
+  def bind_instancia
+    @base
+  end
 end
 
 
+class Aspect_Parameter_Matcher
+
+  attr_accessor :type
+
+  def initialize(type)
+    @type = type
+  end
+
+  def self.get_by(tipo)
+    return Aspect_Parameter_Matcher_Regex.new(tipo) if tipo.is_a? Regexp
+    Aspect_Parameter_Matcher_Type.new(tipo)
+  end
+end
+
+class Aspect_Parameter_Matcher_Type < Aspect_Parameter_Matcher
+
+  def match(param)
+    type == param.first
+  end
+end
+
+class Aspect_Parameter_Matcher_Regex < Aspect_Parameter_Matcher
+
+  def match(param)
+    type.match(param.last)
+  end
+end
+
 # TODO: Ir reemplazando los siguientes Refactors
+
+class Aspects_Mutagen
+  attr_reader :owner, :metodo
+
+  def initialize(owner, method)
+    @owner = owner
+    @metodo = method
+  end
+
+  def method_match(regexp)
+    regexp.match(symbol)
+  end
+
+  def symbol
+    @metodo.name
+  end
+
+  def binded_method
+    @owner.bind_me_to(@metodo)
+  end
+
+  def redefine_method(sym, &behavour)
+    @owner.definir_metodo sym, &behavour
+  end
+
+  #Not used yet
+
+  def same_atributes?(another_method_aspect)
+    (another_method_aspect.metodo == @metodo) &&
+        (another_method_aspect.owner == @owner)
+  end
+
+  # Transformaciones
+
+  def inject(condition)
+  end
+
+  def redirect_to(new_origin)
+    nuevo = Aspect_Origin.create_origin(new_origin)
+    nuevo_mutageno = Aspects_Mutagen.new(nuevo, nuevo.meth_obtain(self.symbol))
+    redefine_method nuevo_mutageno.symbol do |*param|
+      nuevo_mutageno.binded_method.call *param
+    end
+  end
+
+  def before(&block)
+  end
+
+  def after(&block)
+  end
+
+  def instead_of(&block)
+  end
+end
+
 
 class Aspects_Getter
   attr_accessor :origins
@@ -132,12 +229,12 @@ class Aspects_Getter
     end.flatten(1)
   end
 
-  def transform(metodos, &transf)
-    metodos.each { |m| m.instance_eval &transf }
+  def transform(mutagens, &transf)
+    mutagens.each { |m| m.instance_eval &transf }
   end
 
   def name(regex)
-    proc { |mutagen| regex.match(mutagen.symbol) }
+    proc { |mutagen| mutagen.method_match(regex) }
   end
 
   def is_private
@@ -149,7 +246,12 @@ class Aspects_Getter
   end
 
   def has_parameters(cant, tipo = /.*/)
-
+    proc do |mutagen|
+      mutagen.metodo
+          .parameters
+          .select { |param| Aspect_Parameter_Matcher.get_by(tipo).match(param) }
+          .count == cant
+    end
   end
 
   def mandatory
@@ -164,7 +266,6 @@ class Aspects_Getter
     proc { |mutagen| !block.call mutagen }
   end
 end
-
 
 class Aspects
 
