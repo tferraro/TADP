@@ -69,19 +69,19 @@ describe 'Tests sobre Condiciones' do
     expect(Aspects.on(MiClase) {
              where name(/fo{2}/)
              # array con el metodo foo
-           }).to eq ("Me pasaste #{MiClase} y #{[:foo]}")
+           }.first.symbol).to eq (:foo)
     expect(Aspects.on(MiClase) {
              where name(/fo{2}/), name(/foo/)
              # array con el metodo foo matcheando ambas regex
-           }).to eq ("Me pasaste #{MiClase} y #{[:foo]}")
+           }.first.symbol).to eq (:foo)
     expect(Aspects.on(MiClase) {
              where name(/^fi+/)
              # array vacio, ninguno matchea
-           }).to eq ("Me pasaste #{MiClase} y #{[]}")
+           }).to eq ([])
     expect(Aspects.on(MiClase) {
              where name(/foo/), name(/bar/)
              # array vacio, ninguno matchea ambas regex
-           }).to eq ("Me pasaste #{MiClase} y #{[]}")
+           }).to eq ([])
   end
 
   it 'condicion visibilidad' do
@@ -96,11 +96,11 @@ describe 'Tests sobre Condiciones' do
     expect(Aspects.on(MiClase) {
              where name(/bar/), is_private
              # array con el metodo bar
-           }).to eq ("Me pasaste #{MiClase} y #{[:bar]}")
+           }.first.symbol).to eq (:bar)
     expect(Aspects.on(MiClase) {
              where name(/bar/), is_public
              # array vacio
-           }).to eq ("Me pasaste #{MiClase} y #{[]}")
+           }).to eq ([])
   end
 
   it 'condicion cantidad de parametros' do
@@ -114,15 +114,15 @@ describe 'Tests sobre Condiciones' do
     expect(Aspects.on(MiClase) {
              where has_parameters(3, mandatory)
              # array con el metodo foo
-           }).to eq ("Me pasaste #{MiClase} y #{[:foo]}")
+           }.first.symbol).to eq (:foo)
     expect(Aspects.on(MiClase) {
              where has_parameters(6)
              # array con el metodo foo
-           }).to eq ("Me pasaste #{MiClase} y #{[:foo]}")
+           }.first.symbol).to eq (:foo)
     expect(Aspects.on(MiClase) {
              where has_parameters(3, optional)
              # array con el metodo foo y bar
-           }).to eq ("Me pasaste #{MiClase} y #{[:foo, :bar]}")
+           }.map { |m| m.symbol }).to eq ([:foo, :bar])
 
   end
 
@@ -137,15 +137,15 @@ describe 'Tests sobre Condiciones' do
     expect(Aspects.on(MiClase) {
              where has_parameters(1, /param.*/)
              # array con el metodo bar
-           }).to eq ("Me pasaste #{MiClase} y #{[:bar]}")
+           }.first.symbol).to eq (:bar)
     expect(Aspects.on(MiClase) {
              where has_parameters(2, /param.*/)
              # array con el metodo foo
-           }).to eq ("Me pasaste #{MiClase} y #{[:foo]}")
+           }.first.symbol).to eq (:foo)
     expect(Aspects.on(MiClase) {
              where has_parameters(3, /param.*/)
              # array con el metodo foo
-           }).to eq ("Me pasaste #{MiClase} y #{[]}")
+           }).to eq ([])
   end
 
   it 'condicion negacion' do
@@ -162,7 +162,7 @@ describe 'Tests sobre Condiciones' do
     expect(Aspects.on(MiClase) {
              where name(/foo\d/), neg(has_parameters(1))
              # array con los metodos foo2 y foo3
-           }).to eq ("Me pasaste #{MiClase} y #{[:foo2, :foo3]}")
+           }.map { |m| m.symbol }).to eq ([:foo2, :foo3])
   end
 end
 
