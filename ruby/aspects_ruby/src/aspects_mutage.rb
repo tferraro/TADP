@@ -22,13 +22,6 @@ class Aspects_Mutagen
     @owner.definir_metodo sym, &behavour
   end
 
-  #Not used yet
-
-  def same_atributes?(another_method_aspect)
-    (another_method_aspect.metodo == @metodo) &&
-        (another_method_aspect.owner == @owner)
-  end
-
   # Transformaciones
 
   def inject(condition)
@@ -60,7 +53,7 @@ class Aspects_Mutagen
     mutagen = self
     redefine_method mutagen.symbol do |*param|
       cont = proc { |_, _, *args| mutagen.binded_method(Aspect_Origin.create_origin(self)).call *args }
-      self.instance_exec self, cont, *param, &block
+      instance_exec self, cont, *param, &block
     end
   end
 
@@ -68,14 +61,14 @@ class Aspects_Mutagen
     mutagen = self
     redefine_method mutagen.symbol do |*param|
       previous = mutagen.binded_method(Aspect_Origin.create_origin(self)).call *param
-      self.instance_exec self, previous, &block
+      instance_exec self, previous, &block
     end
   end
 
   def instead_of(&block)
     mutagen = self
     redefine_method mutagen.symbol do |*param|
-      self.instance_exec self, *param, &block
+      instance_exec self, *param, &block
     end
   end
 end

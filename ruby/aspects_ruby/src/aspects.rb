@@ -1,8 +1,8 @@
-require_relative '../src/aspects_getter'
+require_relative '../src/aspects_converter'
 require_relative '../src/aspects_origin'
 class Aspects
 
-  @converter = Aspects_Getter.new
+  @converter = Aspects_Converter.new
 
   def Aspects.on(*objetos, &condicion)
     _validar_argumentos(objetos, condicion)
@@ -18,7 +18,7 @@ class Aspects
 
   def self._convertir_a_origenes_validos(objetos)
     origins = Aspects_Origin_Converter
-                  .create_origins(objetos)
+                  .convert_to_origins(objetos)
                   .map { |s| Aspect_Origin.create_origin(s) }
     raise ArgumentError, 'origen vacio' if origins.empty?
     origins

@@ -8,19 +8,19 @@ describe 'Usar Conversor a Origenes' do
   end
 
   it 'probar la conversion a MiClaseLoca con Clase y Regex' do
-    expect(Aspects_Origin_Converter.create_origins([MiClaseLoca, /MiClase/])).to eq([MiClaseLoca])
+    expect(Aspects_Origin_Converter.convert_to_origins([MiClaseLoca, /MiClase/])).to eq([MiClaseLoca])
   end
 
   it 'probar la conversion a MiClaseLoca con Regex' do
-    expect(Aspects_Origin_Converter.create_origins([/MiClase/])).to eq([MiClaseLoca])
+    expect(Aspects_Origin_Converter.convert_to_origins([/MiClase/])).to eq([MiClaseLoca])
   end
 
   it 'al no matchear con nada devuelve un array vacio' do
-    expect(Aspects_Origin_Converter.create_origins([/BLABLABLABLA/])).to eq([])
+    expect(Aspects_Origin_Converter.convert_to_origins([/BLABLABLABLA/])).to eq([])
   end
 
   it 'multiples regexp matchean' do
-    expect(Aspects_Origin_Converter.create_origins([/^Class/, /^Object$/])).to eq([Class, Object])
+    expect(Aspects_Origin_Converter.convert_to_origins([/^Class/, /^Object$/])).to eq([Class, Object])
   end
 end
 
@@ -30,7 +30,7 @@ describe 'Usar Aspects para conseguir un Origenes' do
   end
 
   it 'probar la conversion a MiClaseLoca con Clase y Regex' do
-    source = Aspects_Origin_Converter.create_origins([/MiClase/])
+    source = Aspects_Origin_Converter.convert_to_origins([/MiClase/])
     origins = source.map { |s| Aspect_Origin.create_origin(s) }
     expect(origins.first.base).to eq(MiClaseLoca)
   end
@@ -42,7 +42,7 @@ describe 'Usar Aspects para conseguir un Origenes' do
       end
     end
     origins = Aspects_Origin_Converter
-                  .create_origins([claseLoca.new])
+                  .convert_to_origins([claseLoca.new])
                   .map { |s| Aspect_Origin.create_origin(s) }
     expect(origins.first.sym_publicos(false)).to eq([:foo])
   end
@@ -55,7 +55,7 @@ describe 'Usar Aspects para conseguir un Origenes' do
       end
     end
     origins = Aspects_Origin_Converter
-                  .create_origins([claseLoca.new])
+                  .convert_to_origins([claseLoca.new])
                   .map { |s| Aspect_Origin.create_origin(s) }
     expect(origins.first.sym_privados(false)).to eq([:bar])
   end

@@ -2,7 +2,7 @@ require_relative '../src/aspects_mutage'
 
 class Aspects_Origin_Converter
 
-  def self.create_origins(sources)
+  def self.convert_to_origins(sources)
     sources.map { |s| convert_base(s) }.inject([]) { |x, y| x + y }.uniq
   end
 
@@ -131,34 +131,3 @@ class Aspect_Origin_Instance < Aspect_Origin
     @base
   end
 end
-
-
-class Aspect_Parameter_Matcher
-
-  attr_accessor :type
-
-  def initialize(type)
-    @type = type
-  end
-
-  def self.get_by(tipo)
-    return Aspect_Parameter_Matcher_Regex.new(tipo) if tipo.is_a? Regexp
-    Aspect_Parameter_Matcher_Type.new(tipo)
-  end
-end
-
-class Aspect_Parameter_Matcher_Type < Aspect_Parameter_Matcher
-
-  def match(param)
-    type == param.first
-  end
-end
-
-class Aspect_Parameter_Matcher_Regex < Aspect_Parameter_Matcher
-
-  def match(param)
-    type.match(param.last)
-  end
-end
-
-# TODO: Ir reemplazando los siguientes Refactors

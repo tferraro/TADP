@@ -1,6 +1,7 @@
 require_relative '../src/aspects_mutage'
+require_relative '../src/aspects_matchers'
 
-class Aspects_Getter
+class Aspects_Converter
   attr_accessor :origins
 
   # Condiciones
