@@ -14,6 +14,14 @@ class Aspects_Mutagen
     @metodo.name
   end
 
+  def conoce_metodo?(type= false)
+    @owner.conoce?(symbol, type)
+  end
+
+  def es_local?
+    @owner.sym_all_metodos(false).include? symbol
+  end
+
   def binded_method(owner = @owner)
     owner.bind_me_to(@metodo)
   end
@@ -26,18 +34,12 @@ class Aspects_Mutagen
 
   def inject(condition)
     mutagen = self
-    parameters = binded_method.parameters.map { |_, p| p }
-    parameters2 = parameters.map { |p| (condition.has_key? p) ? condition[p] : p }
-    #Receptor=owner; Mensaje=s2 ArgAnt = ??
-    redefine_method mutagen.symbol do |*args|
-      parameters2 = parameters2.map do |p|
-        if p.is_a? Proc
-          p.call(mutagen.owner, mutagen.symbol, args[parameters.index (parameters - parameters2).first])
-        else
-          p
-        end
+    injections = binded_method.parameters.map { |_, p| Aspect_Parameter_Injecter.get_injecter(condition[p], self) }
+    redefine_method self.symbol do |*param|
+      for i in 0..((param.count)-1)
+        injections[i].set_original(param[i])
       end
-      mutagen.binded_method.call *(parameters2.map { |sym| (sym.is_a? Symbol) ? args[parameters2.index sym] : sym })
+      mutagen.binded_method.call *(injections.map { |i| i.get_value })
     end
   end
 

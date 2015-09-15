@@ -36,32 +36,12 @@ class Aspect_Origin
     @base.send sym_public, type
   end
 
-  def meth_all_metodos(type= true)
-    meth_privados(type) + meth_publicos(type)
-  end
-
-  def meth_publicos(type= true)
-    __methods_obtain__(sym_publicos(type))
-  end
-
-  def meth_privados(type= true)
-    __methods_obtain__(sym_privados(type))
-  end
-
   def definir_metodo(sym, &behaviour)
     @base.send sym_definir, sym, &behaviour
   end
 
   def meth_obtain(sym)
-    method_check __get_meth__ sym
-  end
-
-  def __get_meth__(sym)
-    @base.send sym_method, sym
-  end
-
-  def __methods_obtain__(collection)
-    collection.map { |sym| meth_obtain sym }
+    method_check @base.send sym_method, sym
   end
 
   def bind_me_to(method)

@@ -185,6 +185,15 @@ describe 'Aspect condiciones' do
           where has_parameters(1, /^nana.*/)
         end.first.metodo).to eq(klaseLoca.instance_method(:pepita3))
   end
+
+  it 'Probamos el where-local' do
+    klaseLoca = Class.new do
+      def holis
+
+      end
+    end
+    expect(Aspects.on(klaseLoca) { where local }.first.metodo).to eq(klaseLoca.instance_method(:holis))
+  end
 end
 
 describe 'Aspect transformaciones con redirec_to' do

@@ -8,8 +8,8 @@ class Aspects_Converter
 
   def where(*condiciones)
     origins.map do |origen|
-      origen.meth_all_metodos
-          .map { |metodo| Aspects_Mutagen.new origen, metodo }
+      origen.sym_all_metodos
+          .map { |sym| Aspects_Mutagen.new origen, origen.meth_obtain(sym) }
           .select { |mutagen| condiciones.all? { |cond| cond.call mutagen } }
     end.flatten(1)
   end
@@ -23,11 +23,11 @@ class Aspects_Converter
   end
 
   def is_private
-    proc { |mutagen| !mutagen.owner.conoce?(mutagen.symbol) and mutagen.owner.conoce?(mutagen.symbol, true) }
+    proc { |mutagen| !mutagen.conoce_metodo? and mutagen.conoce_metodo?(true) }
   end
 
   def is_public
-    proc { |mutagen| mutagen.owner.conoce? mutagen.symbol }
+    proc { |mutagen| mutagen.conoce_metodo? }
   end
 
   def has_parameters(cant, tipo = /.*/)
@@ -49,5 +49,9 @@ class Aspects_Converter
 
   def neg(block)
     proc { |mutagen| !block.call mutagen }
+  end
+
+  def local
+    proc { |mutagen| mutagen.es_local? }
   end
 end
