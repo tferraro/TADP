@@ -36,9 +36,7 @@ class Aspects_Mutagen
     mutagen = self
     injections = binded_method.parameters.map { |_, p| Aspect_Parameter_Injecter.get_injecter(condition[p], self) }
     redefine_method self.symbol do |*param|
-      for i in 0..((param.count)-1)
-        injections[i].set_original(param[i])
-      end
+      (0..((param.count)-1)).each { |i| injections[i].set_original(param[i])}
       mutagen.binded_method.call *(injections.map { |i| i.get_value })
     end
   end
