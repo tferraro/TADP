@@ -30,6 +30,10 @@ class Aspects_Mutagen
     @owner.definir_metodo sym, &behavour
   end
 
+  def method_parameters
+    @metodo.parameters
+  end
+
   # Transformaciones
 
   def inject(condition)

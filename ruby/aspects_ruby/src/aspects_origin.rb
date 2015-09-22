@@ -45,12 +45,11 @@ class Aspect_Origin
   end
 
   def bind_me_to(method)
-    method.bind(bind_instancia)
+    method.bind instancia
   end
 
-
   def conoce?(sym, visibility= false)
-    (conoce_instance).respond_to? sym, visibility
+    instancia.respond_to? sym, visibility
   end
 end
 
@@ -76,11 +75,7 @@ class Aspect_Origin_Class < Aspect_Origin
     :private_instance_methods
   end
 
-  def conoce_instance
-    @base.new
-  end
-
-  def bind_instancia
+  def instancia
     @base.new
   end
 end
@@ -107,11 +102,7 @@ class Aspect_Origin_Instance < Aspect_Origin
     :private_methods
   end
 
-  def conoce_instance
-    @base
-  end
-
-  def bind_instancia
+  def instancia
     @base
   end
 end

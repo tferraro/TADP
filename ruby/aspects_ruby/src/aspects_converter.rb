@@ -4,8 +4,6 @@ require_relative '../src/aspects_matchers'
 class Aspects_Converter
   attr_accessor :origins
 
-  # Condiciones
-
   def where(*condiciones)
     origins.map do |origen|
       origen.sym_all_metodos
@@ -32,8 +30,7 @@ class Aspects_Converter
 
   def has_parameters(cant, tipo = /.*/)
     proc do |mutagen|
-      mutagen.metodo
-          .parameters
+      mutagen.method_parameters
           .select { |param| Aspect_Parameter_Matcher.get_by(tipo).match(param) }
           .count == cant
     end
