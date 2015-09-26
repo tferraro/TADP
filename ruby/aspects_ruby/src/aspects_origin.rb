@@ -20,6 +20,7 @@ class Aspect_Origin
   end
 
   def self.create_origin(source)
+    return source if source.is_a? Aspect_Origin
     return Aspect_Origin_Instance.new(source) unless source.is_a? Module
     Aspect_Origin_Class.new(source)
   end
@@ -47,16 +48,19 @@ class Aspect_Origin
   def bind_me_to(method)
     method.bind instancia
   end
-
-  def conoce?(sym, visibility= false) # TODO: No usar una instancia cualquiera
-    instancia.respond_to? sym, visibility
-  end
 end
 
 class Aspect_Origin_Class < Aspect_Origin
 
   def method_check(method)
     method
+  end
+
+  def conoce?(sym, privacy= false)
+    meth = sym_publicos
+    meth = sym_publicos + sym_privados if privacy
+    meth.include? sym
+
   end
 
   def sym_method
@@ -84,6 +88,10 @@ class Aspect_Origin_Instance < Aspect_Origin
 
   def method_check(method)
     method.unbind
+  end
+
+  def conoce?(sym, privacy= false)
+    @base.respond_to? sym, privacy
   end
 
   def sym_method

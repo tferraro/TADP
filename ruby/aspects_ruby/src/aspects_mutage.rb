@@ -23,7 +23,7 @@ class Aspects_Mutagen
   end
 
   def binded_method(owner = @owner)
-    owner.bind_me_to(@metodo)
+    Aspect_Origin.create_origin(owner).bind_me_to(@metodo)
   end
 
   def redefine_method(sym, &behavour)
@@ -41,7 +41,7 @@ class Aspects_Mutagen
     injections = binded_method.parameters.map { |_, p| Aspect_Parameter_Injecter.get_injecter(condition[p], self) }
     redefine_method self.symbol do |*param|
       (0..((param.count)-1)).each { |i| injections[i].set_original(param[i])}
-      mutagen.binded_method.call *(injections.map { |i| i.get_value })
+      mutagen.binded_method(self).call *(injections.map { |i| i.get_value })
     end
   end
 
@@ -56,7 +56,7 @@ class Aspects_Mutagen
   def before(&block)
     mutagen = self
     redefine_method mutagen.symbol do |*param|
-      cont = proc { |_, _, *args| mutagen.binded_method(Aspect_Origin.create_origin(self)).call *args }
+      cont = proc { |_, _, *args| mutagen.binded_method(self).call *args }
       instance_exec self, cont, *param, &block
     end
   end
@@ -64,7 +64,7 @@ class Aspects_Mutagen
   def after(&block)
     mutagen = self
     redefine_method mutagen.symbol do |*param|
-      previous = mutagen.binded_method(Aspect_Origin.create_origin(self)).call *param
+      previous = mutagen.binded_method(self).call *param
       instance_exec self, previous, &block
     end
   end
