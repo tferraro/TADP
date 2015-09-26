@@ -3,7 +3,7 @@ require_relative '../src/aspects_mutage'
 class Aspects_Origin_Converter
 
   def self.convert_to_origins(sources)
-    sources.map { |s| convert_base(s) }.inject([]) { |x, y| x + y }.uniq
+    sources.map { |s| convert_base(s) }.flatten(1).uniq
   end
 
   def self.convert_base(base)
