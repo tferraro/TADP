@@ -48,7 +48,7 @@ class Aspect_Origin
     method.bind instancia
   end
 
-  def conoce?(sym, visibility= false)
+  def conoce?(sym, visibility= false) # TODO: No usar una instancia cualquiera
     instancia.respond_to? sym, visibility
   end
 end
