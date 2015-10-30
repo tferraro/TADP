@@ -7,26 +7,27 @@ trait Raza {
   }
 }
 
-class Humano extends Raza {
+case class Humano() extends Raza {
 }
 
-class Saiyajin extends Raza {
+case class Saiyajin(var nivelSS:Int = 0) extends Raza {   
   override def aumentoKi(cant: Int) = cant
-  
+
+  def transfSS(raza: Saiyajin) = copy(raza.nivelSS +1)
 }
 
 
-class Androide extends Raza {
+case class Androide() extends Raza {
   override def aumentoKi(cant: Int)= 0
   
 }
 
 
-class Namekusein extends Raza {
+case class Namekusein() extends Raza {
   
 }
 
 
-class Monstruo extends Raza {
+case class Monstruo() extends Raza {
   
 }
