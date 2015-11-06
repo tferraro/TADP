@@ -85,20 +85,32 @@ object GuerrerosZ {
   case object Municion extends Item
 
   trait TipoArma {
-    def infligirDaño(guerrero: Guerrero): Guerrero
+    def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int] = None): Guerrero
   }
 
   case object ArmaRoma extends TipoArma {
-    def infligirDaño(guerrero: Guerrero) = {
+    def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int] = None) = {
       if (!guerrero.especie.equals(Androide) && guerrero.energia < 300)
         guerrero.cambiarEstado(KO)
       else
         guerrero
     }
   }
+  
+  case object ArmaFilosa extends TipoArma {
+    def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int]) = {    
+      guerrero.especie match {
+        case Saiyan(cola) if cola =>  guerrero.estado match {
+            case MonoGigante  =>  guerrero.actualizarEspecie(Saiyan(false)).disminuirEnergia(guerrero.energia - 1).cambiarEstado(KO)
+            case _            =>  guerrero.actualizarEspecie(Saiyan(false)).disminuirEnergia(guerrero.energia - 1)
+        }
+        case _                    =>  guerrero.disminuirEnergia(kiAtacante.get /100)
+      }  
+    }
+  }
 
   case object ArmaFuego extends TipoArma {
-    def infligirDaño(guerrero: Guerrero) = {
+    def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int] = None) = {
       guerrero.especie match {
         case Humano                                   => guerrero.disminuirEnergia(20)
         case Namekusein if guerrero.estado.equals(KO) => guerrero.disminuirEnergia(10)

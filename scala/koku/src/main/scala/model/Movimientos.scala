@@ -44,10 +44,10 @@ object Movimientos {
       if (user.items.contains(item))
         item match {
           case Arma(tipo) => tipo match {
-            case ArmaFuego if user.tieneItem(Municion) =>
-              (user.removerItem(Municion), tipo.infligirDaño(enemigo))
-            case _ if tipo != ArmaFuego => (user.pasar, tipo.infligirDaño(enemigo))
-            case _                      => (user.pasar, enemigo.pasar)
+            case ArmaFuego  if user.tieneItem(Municion)       => (user.removerItem(Municion), tipo.infligirDaño(enemigo))
+            case ArmaRoma                                     => (user.pasar, tipo.infligirDaño(enemigo))
+            case ArmaFilosa if !user.especie.equals(Androide) => (user.pasar, tipo.infligirDaño(enemigo, Some(user.energia)))
+            case _                                            => (user.pasar, enemigo.pasar)
           }
           case SemillaDelHermitaño => (user.pasar, enemigo.pasar)
           case _                   => (user.pasar, enemigo.pasar)

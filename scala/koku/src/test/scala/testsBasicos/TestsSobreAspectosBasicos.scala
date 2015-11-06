@@ -228,6 +228,39 @@ class TestsSobreAspectosBasicos {
     val vegeta: Guerrero = Guerrero("vegeta", Saiyan(), 380, 450)
     assertEquals(Tranca, koku.usarMovimiento(UsarItem(Arma(ArmaRoma)))(vegeta)._2.estado)
   }
+  
+  @Test
+  def proofOfConceptArmaFilosaNoAtacaAndroide() {
+    val arale: Guerrero = Guerrero("arale", Androide, 30, 150).agregarItems(Arma(ArmaFilosa))
+    val vegeta: Guerrero = Guerrero("vegeta", Saiyan(true), 380, 450)
+    assertEquals(380, arale.usarMovimiento(UsarItem(Arma(ArmaFilosa)))(vegeta)._2.energia)
+  }
+
+  @Test
+  def proofOfConceptArmaFilosaASaiyanTranca() {
+    val trunks: Guerrero = Guerrero("trunks", Saiyan(), 380, 450).agregarItems(Arma(ArmaFilosa))
+    val koku: Guerrero = Guerrero("vegeta", Saiyan(), 380, 450)
+    assertEquals(1, trunks.usarMovimiento(UsarItem(Arma(ArmaFilosa)))(koku)._2.energia)
+    assertEquals(Saiyan(false), trunks.usarMovimiento(UsarItem(Arma(ArmaFilosa)))(koku)._2.especie)
+    assertEquals(Tranca, trunks.usarMovimiento(UsarItem(Arma(ArmaFilosa)))(koku)._2.estado)
+  }
+   
+   @Test
+  def proofOfConceptArmaFilosaAGuerrero() {
+    val trunks: Guerrero = Guerrero("trunks", Saiyan(), 380, 450).agregarItems(Arma(ArmaFilosa))
+    val kaioshin: Guerrero = Guerrero("Kaioshin", Namekusein, 380, 450)
+    assertEquals(377, trunks.usarMovimiento(UsarItem(Arma(ArmaFilosa)))(kaioshin)._2.energia)
+  }
+  
+  @Test
+  def proofOfConceptArmaFilosaAMonoGigante() {
+    val yayirobe: Guerrero = Guerrero("Yayirobe", Humano, 380, 450).agregarItems(Arma(ArmaFilosa))
+    val vegeta: Guerrero = Guerrero("vegeta", Saiyan(true), 380, 450).agregarItems(FotoLuna)
+    val mono = vegeta.usarMovimiento(TransformarMono)(yayirobe)._1
+    assertEquals(1, yayirobe.usarMovimiento(UsarItem(Arma(ArmaFilosa)))(mono)._2.energia)
+    assertEquals(Saiyan(false), yayirobe.usarMovimiento(UsarItem(Arma(ArmaFilosa)))(mono)._2.especie)
+    assertEquals(KO, yayirobe.usarMovimiento(UsarItem(Arma(ArmaFilosa)))(mono)._2.estado)
+  }
 
   @Test
   def proofOfConceptArmaFuegoAHumanoSinMuniciones() {
