@@ -49,7 +49,7 @@ object Movimientos {
             case ArmaFilosa if !user.especie.equals(Androide) => (user.pasar, tipo.infligirDaño(enemigo, Some(user.energia)))
             case _                                            => (user.pasar, enemigo.pasar)
           }
-          case SemillaDelHermitaño => (user.pasar, enemigo.pasar)
+          case SemillaDelHermitaño if !user.especie.equals(Androide)  => (user.recuperarEnergiaMaxima.removerItem(item), enemigo.pasar)
           case _                   => (user.pasar, enemigo.pasar)
         }
       else

@@ -17,6 +17,13 @@ object GuerrerosZ {
     require(energiaMaxima >= energia, "La energia no puede ser mayor a la máxima")
 
     var kiExterno: Int = 0
+    def recuperarEnergiaMaxima = {
+      val guerreroRecuperado = copy(energia = energiaMaxima)
+      guerreroRecuperado.estado match {
+        case KO => guerreroRecuperado.cambiarEstado(Tranca)
+        case _  => guerreroRecuperado
+      }
+    }
     def aumentarEnergia(cuanto: Int) = {
       val energiaPosta = energia + cuanto
       if (energiaPosta > energiaMaxima)
@@ -62,7 +69,11 @@ object GuerrerosZ {
     def tieneItem(item: Item): Boolean = items.contains(item)
     def usarMovimiento(mov: Movimiento)(enemigo: Guerrero) = {
       estado match {
-        case KO | DEAD => (this, enemigo)
+        case DEAD      => (this,enemigo)   
+        case KO        => mov match {
+          case UsarItem(item) if (item.equals(SemillaDelHermitaño)) => mov(this,enemigo)
+          case _                                                    => (this,enemigo)
+        }
         case _         => mov(this, enemigo)
       }
     }

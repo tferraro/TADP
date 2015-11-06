@@ -293,6 +293,38 @@ class TestsSobreAspectosBasicos {
   }
 
   @Test
+  def proofOfConceptSemillaDelHermitañoGuerrero() {
+    val kaioshin: Guerrero = Guerrero("Kaioshin", Namekusein, 380, 450).agregarItems(SemillaDelHermitaño)
+    val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150)
+    assertEquals(450, kaioshin.usarMovimiento(UsarItem(SemillaDelHermitaño))(koku)._1.energia)
+  }
+  
+  @Test
+  def proofOfConceptSemillaDelHermitañoGuerreroKO() {
+    val kaioshin: Guerrero = Guerrero("Kaioshin", Namekusein, 0, 450,KO).agregarItems(SemillaDelHermitaño)
+    val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150)
+    assertEquals(Tranca, kaioshin.usarMovimiento(UsarItem(SemillaDelHermitaño))(koku)._1.estado)
+    assertEquals(450, kaioshin.usarMovimiento(UsarItem(SemillaDelHermitaño))(koku)._1.energia)
+  }
+  
+  @Test
+  def proofOfConceptSemillaDelHermitañoGuerreroDEAD() {
+    val kaioshin: Guerrero = Guerrero("Kaioshin", Namekusein, 0, 450,DEAD).agregarItems(SemillaDelHermitaño)
+    val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150)
+    assertEquals(DEAD, kaioshin.usarMovimiento(UsarItem(SemillaDelHermitaño))(koku)._1.estado)
+    assertEquals(0, kaioshin.usarMovimiento(UsarItem(SemillaDelHermitaño))(koku)._1.energia)
+  }
+  
+  @Test
+  def proofOfConceptSemillaDelHermitañoSuperSaiyan() {
+    val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150).agregarItems(SemillaDelHermitaño)
+    val kaioshin: Guerrero = Guerrero("Kaioshin", Namekusein, 380, 450)
+    val kokuss = TransformarSuperSaiyan(koku, kaioshin)._1
+    assertEquals(750, kokuss.usarMovimiento(UsarItem(SemillaDelHermitaño))(kaioshin)._1.energia)
+    assertEquals(SuperSaiyan(1), kokuss.usarMovimiento(UsarItem(SemillaDelHermitaño))(kaioshin)._1.estado)
+  }
+  
+  @Test
   def proofOfConceptGolpesNinja() {
     val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150)
     val vegeta: Guerrero = Guerrero("vegeta", Saiyan(), 150, 150)
