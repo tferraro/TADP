@@ -178,4 +178,8 @@ object Movimientos {
       (user, recibirEnergia(enemigo, Math.pow(10.toDouble, user.kiExterno.toDouble).toInt))
     }
   }
+  
+  //El Criterio recibe una la tupla resultante de aplicar el movimiento. ¿Como veo si es efectivo?
+  type Criterio
+  
 }

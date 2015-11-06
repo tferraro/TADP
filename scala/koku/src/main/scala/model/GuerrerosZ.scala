@@ -24,6 +24,12 @@ object GuerrerosZ {
         case _  => guerreroRecuperado
       }
     }
+    
+    def perderCola = especie match {
+      case Saiyan(_) => actualizarEspecie(Saiyan(false))
+      case _ => this
+    }
+    
     def aumentarEnergia(cuanto: Int) = {
       val energiaPosta = energia + cuanto
       if (energiaPosta > energiaMaxima)
@@ -77,7 +83,15 @@ object GuerrerosZ {
         case _         => mov(this, enemigo)
       }
     }
+    
+    def movimientoMasEfectivoContra(oponente: Guerrero, criterio: Criterio) ={
+      //Seleccionar el movimiento más efectivo según un criterio.
+      //COMO: cuantificamos los movimientos (asignamos valor y ordenamos)
+    
+    }    
+    
   }
+ 
 
   trait EstadoGuerrero
   case object Tranca extends EstadoGuerrero
@@ -112,8 +126,8 @@ object GuerrerosZ {
     def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int]) = {    
       guerrero.especie match {
         case Saiyan(cola) if cola =>  guerrero.estado match {
-            case MonoGigante  =>  guerrero.actualizarEspecie(Saiyan(false)).disminuirEnergia(guerrero.energia - 1).cambiarEstado(KO)
-            case _            =>  guerrero.actualizarEspecie(Saiyan(false)).disminuirEnergia(guerrero.energia - 1)
+            case MonoGigante  =>  guerrero.perderCola.disminuirEnergia(guerrero.energia - 1).cambiarEstado(KO)
+            case _            =>  guerrero.perderCola.disminuirEnergia(guerrero.energia - 1)
         }
         case _                    =>  guerrero.disminuirEnergia(kiAtacante.get /100)
       }  
