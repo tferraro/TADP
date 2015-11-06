@@ -9,14 +9,11 @@ import model.Especies._
 class TestsSobreRequerimientos {
   
   @Test
-  def crearUnGuerreroCualquiera() {
-    var koku: Guerrero = Guerrero("koku", Saiyan(), 50, 150)
-    var androide17: Guerrero = Guerrero("lapis", Androide, 30, 150)
-
-    assertEquals(Saiyan(), koku.especie)
-    assertEquals(Androide, androide17.especie)
-    assertEquals(50, koku.energia)
-    assertEquals(30, androide17.energia)
+  def proofOfConceptMejorMovimiento() {
+    var koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150)
+    var n18: Guerrero = Guerrero("n18", Androide, 30, 150)
+    assertEquals(DEAD, koku.usarMovimiento(Onda(15))(n18)._2.estado)
+    assertEquals(10, koku.usarMovimiento(Onda(10))(n18)._2.energia)
   }
   
 }

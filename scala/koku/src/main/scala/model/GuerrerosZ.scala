@@ -43,7 +43,7 @@ object GuerrerosZ {
         if (energiaPosta > 0)
           copy(energia = energiaPosta)
         else
-          copy(energia = 0)
+          copy(energia = 0)  //Nunca tengo energia negativa.
       }
       guerreroDescargado.energia match {
         case 0 => guerreroDescargado.cambiarEstado(DEAD)
@@ -84,12 +84,13 @@ object GuerrerosZ {
       }
     }
     
-    def movimientoMasEfectivoContra(oponente: Guerrero, criterio: Criterio) ={
-      //Seleccionar el movimiento más efectivo según un criterio.
-      //COMO: cuantificamos los movimientos (asignamos valor y ordenamos)
-    
-    }    
-    
+    def movimientoMasEfectivoContra(oponente: Guerrero, criterio: Criterio): Movimiento ={
+     val mejorMovimiento = movimientos.maxBy(movimiento => criterio.evaluar(movimiento,this,oponente))
+     if (criterio.evaluar(mejorMovimiento,this,oponente) > 0)
+       mejorMovimiento
+     else
+       null    
+    }
   }
  
 

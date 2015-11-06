@@ -135,7 +135,7 @@ object Movimientos {
         case (Humano, Androide)                        => (user.disminuirEnergia(10), enemigo.pasar)
         case (_, _) if user.energia > enemigo.energia  => (user.pasar, enemigo.disminuirEnergia(20))
         case (_, _) if user.energia < enemigo.energia  => (user.disminuirEnergia(20), enemigo.pasar)
-        // Si ambos tienen el mismo ki, ambos pierden 20
+        //Si ambos tienen el mismo ki, ambos pierden 20
         case (_, _) if user.energia == enemigo.energia => (user.disminuirEnergia(20), enemigo.disminuirEnergia(20))
       }
     }
@@ -179,7 +179,75 @@ object Movimientos {
     }
   }
   
-  //El Criterio recibe una la tupla resultante de aplicar el movimiento. ¿Como veo si es efectivo?
-  type Criterio
+  trait Criterio {
+    def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero):Int
+  }
   
+  object MayorDaño extends Criterio {
+    def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
+      val defensorDañado = movimiento(atacante,defensor)._2
+      defensor.energia - defensorDañado.energia //Nunca da negativo.
+    }
+  }
+  
+  object DerribarEnemigo extends Criterio {
+     def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
+       val defensorDañado = movimiento(atacante,defensor)._2
+       defensorDañado.estado match {
+         case DEAD => 2
+         case KO   => 1
+         case _    => 0  //Si esta Tranca, bien. Si no hubo cambios, no cumplo el Criterio.
+       }
+     }
+  }
+  
+  object SacarPocoKi extends Criterio {
+    def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
+      val defensorDañado = movimiento(atacante,defensor)._2
+      if (defensorDañado.energia < defensor.energia)
+        defensorDañado.energia  //A lo sumo es 0, si lo matas.
+      else
+        0 //Si uso movimientos que no sacan ki, no tiene chiste, no cumplo el Criterio.
+    }
+  }
+  
+  object MovimientoTacaño extends Criterio {
+    def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
+      val atacanteAfectado = movimiento(atacante,defensor)._1
+      if (atacanteAfectado.items.size < atacante.items.size)
+        atacanteAfectado.items.size
+      else
+        0 //No perder items es como usar un movimiento que hace otra cosa menos usar items, no cumplo el Criterio.
+    }
+  }
+  
+  object NoMorir extends Criterio {
+    def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
+      val atacanteAfectado = movimiento(atacante,defensor)._1
+      atacanteAfectado.estado match {
+        case DEAD => 0  //No es la idea morir.
+        case KO   => 1
+        case _    => 3
+      }
+    }
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
 }
