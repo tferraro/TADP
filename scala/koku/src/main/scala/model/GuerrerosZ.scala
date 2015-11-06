@@ -1,0 +1,109 @@
+package model
+
+import model.Movimientos._
+import model.Especies._
+
+object GuerrerosZ {
+
+  case class Guerrero(
+      nombre: String,
+      especie: Especie,
+      energia: Int,
+      energiaMaxima: Int,
+      estado: EstadoGuerrero = Tranca,
+      movimientos: List[Movimiento] = List(),
+      items: List[Item] = List()) {
+
+    require(energiaMaxima >= energia, "La energia no puede ser mayor a la máxima")
+
+    var kiExterno: Int = 0
+    def aumentarEnergia(cuanto: Int) = {
+      val energiaPosta = energia + cuanto
+      if (energiaPosta > energiaMaxima)
+        copy(energia = energiaMaxima)
+      else
+        copy(energia = energiaPosta)
+    }
+    def disminuirEnergia(cuanto: Int): Guerrero = {
+      val energiaPosta = energia - cuanto
+      val guerreroDescargado = {
+        if (energiaPosta > 0)
+          copy(energia = energiaPosta)
+        else
+          copy(energia = 0)
+      }
+      guerreroDescargado.energia match {
+        case 0 => guerreroDescargado.cambiarEstado(DEAD)
+        case _ => guerreroDescargado
+      }
+
+    }
+    def actualizarEspecie(especie: Especie) = copy(especie = especie)
+    def cambiarEstado(nuevo: EstadoGuerrero) = {
+      (especie match {
+        case Fusion(original) if (nuevo == KO || nuevo == DEAD) => original
+        case _ => this
+      }).copy(estado = nuevo)
+    }
+
+    def aumentarEMaxTantasVeces(veces: Int) = copy(energiaMaxima = energiaMaxima * veces)
+    def aumentarEMax(cuantas: Int) = copy(energiaMaxima = energiaMaxima + cuantas)
+    def cargaKiExterno: Guerrero = {
+      val nuevo = copy()
+      nuevo.kiExterno = kiExterno + 1
+      return nuevo
+    }
+    def pasar = copy()
+    def agregarMovimiento(moves: Movimiento*) = copy(movimientos = movimientos ++ moves)
+    def agregarMovimiento(moves: List[Movimiento]) = copy(movimientos = movimientos ++ moves)
+    def agregarItems(item: Item*) = copy(items = items ++ item)
+    def agregarItems(item: List[Item]) = copy(items = items ++ item)
+    def removerItem(item: Item) = copy(items = items diff List(item))
+    def tieneItem(item: Item): Boolean = items.contains(item)
+    def usarMovimiento(mov: Movimiento)(enemigo: Guerrero) = {
+      estado match {
+        case KO | DEAD => (this, enemigo)
+        case _         => mov(this, enemigo)
+      }
+    }
+  }
+
+  trait EstadoGuerrero
+  case object Tranca extends EstadoGuerrero
+  case object KO extends EstadoGuerrero
+  case object DEAD extends EstadoGuerrero
+  case class SuperSaiyan(nivel: Int = 1) extends EstadoGuerrero {
+    def subirNivel = copy(nivel = nivel + 1)
+  }
+  case object MonoGigante extends EstadoGuerrero
+
+  trait Item
+  case object FotoLuna extends Item
+  case class EsferasDelDragon(cuantas: Int) extends Item
+  case object SemillaDelHermitaño extends Item
+  case class Arma(tipo: TipoArma) extends Item
+  case object Municion extends Item
+
+  trait TipoArma {
+    def infligirDaño(guerrero: Guerrero): Guerrero
+  }
+
+  case object ArmaRoma extends TipoArma {
+    def infligirDaño(guerrero: Guerrero) = {
+      if (!guerrero.especie.equals(Androide) && guerrero.energia < 300)
+        guerrero.cambiarEstado(KO)
+      else
+        guerrero
+    }
+  }
+
+  case object ArmaFuego extends TipoArma {
+    def infligirDaño(guerrero: Guerrero) = {
+      guerrero.especie match {
+        case Humano                                   => guerrero.disminuirEnergia(20)
+        case Namekusein if guerrero.estado.equals(KO) => guerrero.disminuirEnergia(10)
+        case _                                        => guerrero
+      }
+    }
+  }
+}
