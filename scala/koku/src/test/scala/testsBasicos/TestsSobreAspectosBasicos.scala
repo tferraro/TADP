@@ -367,7 +367,7 @@ class TestsSobreAspectosBasicos {
     val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150)
     assertEquals(50, koku.usarMovimiento(Onda(100))(vegetaM)._1.energia)
     assertEquals(80, koku.usarMovimiento(Onda(100))(vegetaM)._2.energia)
-    assertEquals(300, koku.usarMovimiento(Onda(100))(androide17)._2.energia)
+    assertEquals(500, koku.usarMovimiento(Onda(100))(androide17)._2.energia) //LA AUMENTA!
     assertEquals(150, koku.usarMovimiento(Onda(600))(vegetaM)._1.energia)
     assertEquals(130, koku.usarMovimiento(Onda(600))(vegetaM)._2.energia)
   }

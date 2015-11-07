@@ -157,13 +157,23 @@ object Movimientos {
   }
 
   trait AtaqueEnergia extends Movimiento {
+    
+    def recibirEnergia(guerrero: Guerrero, energia: Int): Guerrero = {
+      guerrero.especie match {
+        case Androide     => guerrero.aumentarEnergia(energia)
+        case Monstruo (_) => guerrero.disminuirEnergia(energia /2)
+        case _            => guerrero.disminuirEnergia(energia*2)
+      }
+    }
+    
+    /*
     def recibirEnergia(guerrero: Guerrero, energia: Int): Guerrero = {
       val reduccion = guerrero.especie match {
         case Monstruo(_) => energia / 2
         case _           => energia * 2
       }
       guerrero.disminuirEnergia(reduccion)
-    }
+    }*/
   }
   case class Onda(energia: Int) extends AtaqueEnergia {
     def apply(user: Guerrero, enemigo: Guerrero) = {
@@ -186,7 +196,10 @@ object Movimientos {
   object MayorDaño extends Criterio {
     def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
       val defensorDañado = movimiento(atacante,defensor)._2
-      defensor.energia - defensorDañado.energia //Nunca da negativo.
+      if (defensorDañado.energia < defensor.energia)
+        defensor.energia - defensorDañado.energia
+      else
+        0  //Si lanzo Ondas a un androide, le subo la bateria.
     }
   }
   
