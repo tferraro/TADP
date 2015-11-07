@@ -39,7 +39,8 @@ class TestsSobreRequerimientos {
     var vegetaM: Guerrero = Guerrero("Majin Vegeta", Monstruo(ComerALaBuu), 40, 150).agregarMovimiento(ataque1,ataque7)
     var majinBuu: Guerrero = Guerrero("Majin Buu", Monstruo(ComerALaBuu),80,150)
     assertEquals(ataque1, vegetaM.movimientoMasEfectivoContra(majinBuu, NoMorir))
-    
   }
+  
+  
   
 }

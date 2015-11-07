@@ -91,6 +91,12 @@ object GuerrerosZ {
      else
        null    
     }
+    
+    def pelearUnRound(movimiento: Movimiento, oponente: Guerrero) = {
+      
+      
+    }
+    
   }
  
 
