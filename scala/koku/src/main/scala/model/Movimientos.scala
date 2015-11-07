@@ -115,7 +115,7 @@ object Movimientos {
       }
     }
   }
-
+  
   type HabilidadMagica = Function2[Guerrero, Guerrero, (Guerrero, Guerrero)]
   case object RevivirOponente extends HabilidadMagica {
     def apply(user: Guerrero, enemigo: Guerrero) = {
