@@ -239,13 +239,13 @@ object Movimientos {
     
   object VentajaDeKi extends Criterio {
       def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
-        val (atacado,defendido) = movimiento(atacante,defensor)
+        val (atacador,defendido) = movimiento(atacante,defensor)
         (defensor.energia - atacante.energia) match {
-          case desventaja if desventaja < 0 => atacado.energia - defendido.energia
-          case desventaja if desventaja > 0 => (defendido.energia - atacado.energia) match {
-                                                  case diferencia if diferencia > 0 => desventaja - diferencia
+          case desventaja if desventaja <= 0 => atacador.energia - defendido.energia
+          case desventaja if desventaja > 0 => (defendido.energia - atacador.energia) match {
+                                                  case diferencia if diferencia >= 0 => desventaja - diferencia
                                                   case diferencia if diferencia < 0 => diferencia.*(-1)
-                                                }
+                                                  }
        }
      }
    }

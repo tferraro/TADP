@@ -94,9 +94,8 @@ object GuerrerosZ {
     }
     
     def pelearUnRound(movimiento: Movimiento)(oponente: Guerrero) = {
-      
       val (atacador, atacado) = this.usarMovimiento(movimiento)(oponente)
-      atacado.contraAtacarA(atacador)
+      atacado.contraAtacarA(atacador).swap
     }
     
     def contraAtacarA(agresor: Guerrero): (Guerrero, Guerrero) = {
