@@ -72,4 +72,21 @@ class TestsSobreRequerimientos {
   assertEquals(List(UsarItem(Arma(ArmaFilosa)),UsarItem(SemillaDelHermitaño)), yajirobe.planDeAtaqueContra(vegeta, 2)(VentajaDeKi))
   }
   
+  @Test
+  def proofOfConceptAPelear() {
+  var koku: Guerrero = Guerrero("koku",Saiyan(),600,600).agregarItems(SemillaDelHermitaño,SemillaDelHermitaño)
+                                                        .agregarMovimiento(UsarItem(SemillaDelHermitaño),Onda(30),Onda(100),CargarKi,Genkidama,DejarseFajar,MuchosGolpesNinja)
+  var piccolo: Guerrero = Guerrero("Piccolo", Namekusein,500,500).agregarItems(EsferasDelDragon(7),SemillaDelHermitaño)
+                                                                 .agregarMovimiento(UsarItem(SemillaDelHermitaño),Onda(40),Onda(70),CargarKi,MuchosGolpesNinja,Explotar)
+  var elPlanDeGoku = koku.planDeAtaqueContra(piccolo,10)(MayorDaño)
+  
+  var resultado: ResultadoPelea = koku.pelearContra(piccolo)(elPlanDeGoku)
+  
+  }
+  
+  
+  
+  
+  
+  
 }

@@ -84,7 +84,6 @@ object GuerrerosZ {
         case _         => mov(this, enemigo)
         }   
     }
-    
     def movimientoMasEfectivoContra(oponente: Guerrero)(criterio: Criterio): Movimiento ={
      val mejorMovimiento = movimientos.maxBy(movimiento => criterio.evaluar(movimiento,this,oponente))
      if (criterio.evaluar(mejorMovimiento,this,oponente) > 0)
@@ -105,20 +104,41 @@ object GuerrerosZ {
     type PlanDeAtaque = List[Movimiento]
     
     def planDeAtaqueContra(oponente: Guerrero, rounds: Int)(criterio: Criterio): PlanDeAtaque = { 
- 
       var planDeAtaque: PlanDeAtaque = List()
-      
-      //TODO: Hacer refactor para que el planDeAtaque pertenezca a la semilla de foldeo.
-      
       List.range(0,rounds).foldLeft(planDeAtaque,(this,oponente))((semilla,_) => {
-        
        var (plan,(atacante,defensor)) = semilla 
        var movimientoAUsar = atacante.movimientoMasEfectivoContra(defensor)(criterio)
-       
        (plan :+ movimientoAUsar, atacante.pelearUnRound(movimientoAUsar)(defensor))
       })
       ._1
-    } 
+    }    
+    
+    trait ResultadoPelea
+    case object HabemusGanador extends ResultadoPelea {
+      def foldLeft[Movimiento](z: ResultadoPelea)(f: (Movimiento => (ResultadoPelea,(Guerrero,Guerrero))): (ResultadoPelea,(Guerrero,Guerrero)) = evaluar(Pelea)
+    }
+    case object SiguenPeleando extends ResultadoPelea {
+      def foldLeft[Movimiento](z: T))(f: (A => B)): B
+    }
+    
+    def pelearContra(oponente: Guerrero)(planDeAtaque: PlanDeAtaque): ResultadoPelea = {
+      var resultadoPelea: ResultadoPelea = SiguenPeleando
+      
+      planDeAtaque.foldLeft(resultadoPelea,(this,oponente))((semilla,movimiento) => {
+       
+        var(resultado,(atacante,defensor)) = semilla
+        
+        (atacante.pelearUnRound(movimiento)(oponente)
+             
+        
+        
+        
+        HabemusGanador
+        
+      
+      
+      })._1 
+    }
   }
 
   trait EstadoGuerrero
@@ -140,7 +160,6 @@ object GuerrerosZ {
   trait TipoArma {
     def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int] = None): Guerrero
   }
-
   case object ArmaRoma extends TipoArma {
     def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int] = None) = {
       if (!guerrero.especie.equals(Androide) && guerrero.energia < 300)
@@ -149,7 +168,6 @@ object GuerrerosZ {
         guerrero
     }
   }
-  
   case object ArmaFilosa extends TipoArma {
     def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int]) = {    
       guerrero.especie match {
@@ -161,7 +179,6 @@ object GuerrerosZ {
       }  
     }
   }
-
   case object ArmaFuego extends TipoArma {
     def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int] = None) = {
       guerrero.especie match {
