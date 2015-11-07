@@ -7,6 +7,12 @@ object Movimientos {
 
   type Movimiento = Function2[Guerrero, Guerrero, (Guerrero, Guerrero)]
 
+  case object PasarTurno extends Movimiento {
+    def apply(user: Guerrero, enemigo: Guerrero) = {
+      (user.pasar,enemigo.pasar)
+    }
+  }
+  
   case object DejarseFajar extends Movimiento {
     def apply(user: Guerrero, enemigo: Guerrero) = {
       (user.cargaKiExterno, enemigo.pasar)
@@ -182,7 +188,7 @@ object Movimientos {
   }
   
   trait Criterio {
-    def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero):Int
+   def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero):Int
   }
   
   object MayorDaño extends Criterio {
@@ -248,25 +254,5 @@ object Movimientos {
                                                   }
        }
      }
-   }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-   
+  }  
 }

@@ -75,14 +75,14 @@ object GuerrerosZ {
     def tieneItem(item: Item): Boolean = items.contains(item)
     
     def usarMovimiento(mov: Movimiento)(enemigo: Guerrero) = {
-      estado match {
+        estado match {
         case DEAD      => (this,enemigo)   
         case KO        => mov match {
           case UsarItem(item) if (item.equals(SemillaDelHermitaño)) => mov(this,enemigo)
           case _                                                    => (this,enemigo)
-        }
+          }
         case _         => mov(this, enemigo)
-      }
+        }   
     }
     
     def movimientoMasEfectivoContra(oponente: Guerrero)(criterio: Criterio): Movimiento ={
@@ -90,7 +90,7 @@ object GuerrerosZ {
      if (criterio.evaluar(mejorMovimiento,this,oponente) > 0)
        mejorMovimiento
      else
-       null    
+       PasarTurno    
     }
     
     def pelearUnRound(movimiento: Movimiento)(oponente: Guerrero) = {
@@ -101,8 +101,25 @@ object GuerrerosZ {
     def contraAtacarA(agresor: Guerrero): (Guerrero, Guerrero) = {
       this.usarMovimiento(movimientoMasEfectivoContra(agresor)(VentajaDeKi))( agresor: Guerrero)
     }
-  }
+       
+    type PlanDeAtaque = List[Movimiento]
+    
+    def planDeAtaqueContra(oponente: Guerrero, rounds: Int)(criterio: Criterio): PlanDeAtaque = { 
  
+      var planDeAtaque: PlanDeAtaque = List()
+      
+      //TODO: Hacer refactor para que el planDeAtaque pertenezca a la semilla de foldeo.
+      
+      List.range(0,rounds).foldLeft(planDeAtaque,(this,oponente))((semilla,_) => {
+        
+       var (plan,(atacante,defensor)) = semilla 
+       var movimientoAUsar = atacante.movimientoMasEfectivoContra(defensor)(criterio)
+       
+       (plan :+ movimientoAUsar, atacante.pelearUnRound(movimientoAUsar)(defensor))
+      })
+      ._1
+    } 
+  }
 
   trait EstadoGuerrero
   case object Tranca extends EstadoGuerrero
