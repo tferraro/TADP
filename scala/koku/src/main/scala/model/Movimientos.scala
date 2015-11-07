@@ -165,16 +165,8 @@ object Movimientos {
         case _            => guerrero.disminuirEnergia(energia*2)
       }
     }
-    
-    /*
-    def recibirEnergia(guerrero: Guerrero, energia: Int): Guerrero = {
-      val reduccion = guerrero.especie match {
-        case Monstruo(_) => energia / 2
-        case _           => energia * 2
-      }
-      guerrero.disminuirEnergia(reduccion)
-    }*/
   }
+  
   case class Onda(energia: Int) extends AtaqueEnergia {
     def apply(user: Guerrero, enemigo: Guerrero) = {
       if (user.energia >= energia)
