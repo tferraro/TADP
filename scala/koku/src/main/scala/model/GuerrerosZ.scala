@@ -73,6 +73,7 @@ object GuerrerosZ {
     def agregarItems(item: List[Item]) = copy(items = items ++ item)
     def removerItem(item: Item) = copy(items = items diff List(item))
     def tieneItem(item: Item): Boolean = items.contains(item)
+    
     def usarMovimiento(mov: Movimiento)(enemigo: Guerrero) = {
       estado match {
         case DEAD      => (this,enemigo)   
@@ -84,7 +85,7 @@ object GuerrerosZ {
       }
     }
     
-    def movimientoMasEfectivoContra(oponente: Guerrero, criterio: Criterio): Movimiento ={
+    def movimientoMasEfectivoContra(oponente: Guerrero)(criterio: Criterio): Movimiento ={
      val mejorMovimiento = movimientos.maxBy(movimiento => criterio.evaluar(movimiento,this,oponente))
      if (criterio.evaluar(mejorMovimiento,this,oponente) > 0)
        mejorMovimiento
@@ -92,11 +93,15 @@ object GuerrerosZ {
        null    
     }
     
-    def pelearUnRound(movimiento: Movimiento, oponente: Guerrero) = {
+    def pelearUnRound(movimiento: Movimiento)(oponente: Guerrero) = {
       
-      
+      val (atacador, atacado) = this.usarMovimiento(movimiento)(oponente)
+      atacado.contraAtacarA(atacador)
     }
     
+    def contraAtacarA(agresor: Guerrero): (Guerrero, Guerrero) = {
+      this.usarMovimiento(movimientoMasEfectivoContra(agresor)(VentajaDeKi))( agresor: Guerrero)
+    }
   }
  
 
