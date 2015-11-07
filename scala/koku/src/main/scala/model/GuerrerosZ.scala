@@ -113,33 +113,33 @@ object GuerrerosZ {
       ._1
     }    
     
-    trait ResultadoPelea
-    case object HabemusGanador extends ResultadoPelea {
-      def foldLeft[Movimiento](z: ResultadoPelea)(f: (Movimiento => (ResultadoPelea,(Guerrero,Guerrero))): (ResultadoPelea,(Guerrero,Guerrero)) = evaluar(Pelea)
+    trait ResultadoPelea {
+      def map(f: ((Guerrero,Guerrero) => (Guerrero,Guerrero))):(Guerrero,Guerrero)
     }
-    case object SiguenPeleando extends ResultadoPelea {
-      def foldLeft[Movimiento](z: T))(f: (A => B)): B
+    case class HabemusGanador (peleadores: (Guerrero,Guerrero)) extends ResultadoPelea {
+      def map(f: ((Guerrero,Guerrero) => (Guerrero,Guerrero))) = (peleadores._1,peleadores._2)
+    }
+  
+    case class SiguenPeleando(peleadores: (Guerrero,Guerrero)) extends ResultadoPelea {
+      def map(f: ((Guerrero,Guerrero) => (Guerrero,Guerrero))) = SiguenPeleando(f(peleadores._1,peleadores._2))
     }
     
+    
     def pelearContra(oponente: Guerrero)(planDeAtaque: PlanDeAtaque): ResultadoPelea = {
-      var resultadoPelea: ResultadoPelea = SiguenPeleando
       
+      var resultadoPelea: ResultadoPelea = SiguenPeleando(this,oponente)
       planDeAtaque.foldLeft(resultadoPelea,(this,oponente))((semilla,movimiento) => {
-       
-        var(resultado,(atacante,defensor)) = semilla
-        
-        (atacante.pelearUnRound(movimiento)(oponente)
-             
-        
-        
+        var (resultadoPelea,peleadores) = semilla   
+         
         
         HabemusGanador
         
+                   })
       
-      
-      })._1 
-    }
+      }
   }
+
+  
 
   trait EstadoGuerrero
   case object Tranca extends EstadoGuerrero
