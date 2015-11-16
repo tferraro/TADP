@@ -9,10 +9,10 @@ object Movimientos {
 
   case object PasarTurno extends Movimiento {
     def apply(user: Guerrero, enemigo: Guerrero) = {
-      (user.pasar,enemigo.pasar)
+      (user.pasar, enemigo.pasar)
     }
   }
-  
+
   case object DejarseFajar extends Movimiento {
     def apply(user: Guerrero, enemigo: Guerrero) = {
       (user.cargaKiExterno, enemigo.pasar)
@@ -50,13 +50,13 @@ object Movimientos {
       if (user.items.contains(item))
         item match {
           case Arma(tipo) => tipo match {
-            case ArmaFuego  if user.tieneItem(Municion)       => (user.removerItem(Municion), tipo.infligirDaño(enemigo))
-            case ArmaRoma                                     => (user.pasar, tipo.infligirDaño(enemigo))
+            case ArmaFuego if user.tieneItem(Municion) => (user.removerItem(Municion), tipo.infligirDaño(enemigo))
+            case ArmaRoma => (user.pasar, tipo.infligirDaño(enemigo))
             case ArmaFilosa if !user.especie.equals(Androide) => (user.pasar, tipo.infligirDaño(enemigo, Some(user.energia)))
-            case _                                            => (user.pasar, enemigo.pasar)
+            case _ => (user.pasar, enemigo.pasar)
           }
-          case SemillaDelHermitaño if !user.especie.equals(Androide)  => (user.recuperarEnergiaMaxima.removerItem(item), enemigo.pasar)
-          case _                   => (user.pasar, enemigo.pasar)
+          case SemillaDelHermitaño if !user.especie.equals(Androide) => (user.recuperarEnergiaMaxima.removerItem(item), enemigo.pasar)
+          case _ => (user.pasar, enemigo.pasar)
         }
       else
         (user.pasar, enemigo.pasar)
@@ -115,7 +115,7 @@ object Movimientos {
       }
     }
   }
-  
+
   type HabilidadMagica = Function2[Guerrero, Guerrero, (Guerrero, Guerrero)]
   case object RevivirOponente extends HabilidadMagica {
     def apply(user: Guerrero, enemigo: Guerrero) = {
@@ -163,16 +163,16 @@ object Movimientos {
   }
 
   trait AtaqueEnergia extends Movimiento {
-    
+
     def recibirEnergia(guerrero: Guerrero, energia: Int): Guerrero = {
       guerrero.especie match {
-        case Androide     => guerrero.aumentarEnergia(energia)
-        case Monstruo (_) => guerrero.disminuirEnergia(energia /2)
-        case _            => guerrero.disminuirEnergia(energia*2)
+        case Androide    => guerrero.aumentarEnergia(energia)
+        case Monstruo(_) => guerrero.disminuirEnergia(energia / 2)
+        case _           => guerrero.disminuirEnergia(energia * 2)
       }
     }
   }
-  
+
   case class Onda(energia: Int) extends AtaqueEnergia {
     def apply(user: Guerrero, enemigo: Guerrero) = {
       if (user.energia >= energia)
@@ -186,73 +186,77 @@ object Movimientos {
       (user, recibirEnergia(enemigo, Math.pow(10.toDouble, user.kiExterno.toDouble).toInt))
     }
   }
-  
+
   trait Criterio {
-   def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero):Int
+    def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero): Int
+
+    def ordenarMovimientos(lista: List[Movimiento], atacante: Guerrero, defensor: Guerrero) = {
+      lista.sortBy { evaluar(_, atacante, defensor) }(Ordering[Int].reverse)
+    }
   }
-  
+
   object MayorDaño extends Criterio {
     def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
-      val defensorDañado = movimiento(atacante,defensor)._2
+      val defensorDañado = movimiento(atacante, defensor)._2
       if (defensorDañado.energia < defensor.energia)
         defensor.energia - defensorDañado.energia
       else
-        0  //Si lanzo Ondas a un androide, le subo la bateria.
+        0 //Si lanzo Ondas a un androide, le subo la bateria.
     }
   }
-  
+
   object DerribarEnemigo extends Criterio {
-     def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
-       val defensorDañado = movimiento(atacante,defensor)._2
-       defensorDañado.estado match {
-         case DEAD => 2
-         case KO   => 1
-         case _    => 0  //Si esta Tranca, bien. Si no hubo cambios, no cumplo el Criterio.
-       }
-     }
+    def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
+      val defensorDañado = movimiento(atacante, defensor)._2
+      defensorDañado.estado match {
+        case DEAD => 2
+        case KO   => 1
+        case _    => 0 //Si esta Tranca, bien. Si no hubo cambios, no cumplo el Criterio.
+      }
+    }
   }
-  
+
   object SacarPocoKi extends Criterio {
     def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
-      val defensorDañado = movimiento(atacante,defensor)._2
+      val defensorDañado = movimiento(atacante, defensor)._2
       if (defensorDañado.energia < defensor.energia)
-        defensorDañado.energia  //A lo sumo es 0, si lo matas.
+        defensorDañado.energia //A lo sumo es 0, si lo matas.
       else
         0 //Si uso movimientos que no sacan ki, no tiene chiste, no cumplo el Criterio.
     }
   }
-  
+
   object MovimientoTacaño extends Criterio {
     def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
-      val atacanteAfectado = movimiento(atacante,defensor)._1
+      val atacanteAfectado = movimiento(atacante, defensor)._1
       if (atacanteAfectado.items.size < atacante.items.size)
         atacanteAfectado.items.size
       else
         0 //No perder items es como usar un movimiento que hace otra cosa menos usar items, no cumplo el Criterio.
     }
   }
-  
+
   object NoMorir extends Criterio {
     def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
-      val atacanteAfectado = movimiento(atacante,defensor)._1
+      val atacanteAfectado = movimiento(atacante, defensor)._1
       atacanteAfectado.estado match {
-        case DEAD => 0  //No es la idea morir.
+        case DEAD => 0 //No es la idea morir.
         case KO   => 1
         case _    => 3
       }
     }
   }
-    
+
   object VentajaDeKi extends Criterio {
-      def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
-        val (atacador,defendido) = movimiento(atacante,defensor)
-        (defensor.energia - atacante.energia) match {
-          case desventaja if desventaja <= 0 => atacador.energia - defendido.energia
-          case desventaja if desventaja > 0 => (defendido.energia - atacador.energia) match {
-                                                  case diferencia if diferencia >= 0 => desventaja - diferencia
-                                                  case diferencia if diferencia < 0 => diferencia.*(-1)
-                                                  }
-       }
-     }
-  }  
+    def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
+      val (atacador, defendido) = movimiento(atacante, defensor)
+      (defensor.energia - atacante.energia) match {
+        case desventaja if desventaja <= 0 => atacador.energia - defendido.energia
+        case desventaja if desventaja > 0 => (defendido.energia - atacador.energia) match {
+          case diferencia if diferencia >= 0 => desventaja - diferencia
+          case diferencia if diferencia < 0  => diferencia.*(-1)
+        }
+      }
+    }
+  }
 }

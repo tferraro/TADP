@@ -87,11 +87,11 @@ object GuerrerosZ {
       }
     }
     def movimientoMasEfectivoContra(oponente: Guerrero)(criterio: Criterio): Movimiento = {
-      val mejorMovimiento = movimientos.maxBy(movimiento => criterio.evaluar(movimiento, this, oponente))
-      if (criterio.evaluar(mejorMovimiento, this, oponente) > 0)
-        mejorMovimiento
-      else
-        PasarTurno
+      val listaOrdenada = for {
+        mov <- criterio.ordenarMovimientos(movimientos, this, oponente)
+        if (criterio.evaluar(mov, this, oponente) > 0)
+      } yield mov
+      listaOrdenada.headOption.getOrElse(PasarTurno)
     }
 
     def pelearUnRound(movimiento: Movimiento)(oponente: Guerrero) = {
