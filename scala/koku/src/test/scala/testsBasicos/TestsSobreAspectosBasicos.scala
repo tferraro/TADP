@@ -4,7 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import model.GuerrerosZ._
 import model.Movimientos._
-import model.Especies._
+import model._
 
 class TestsSobreAspectosBasicos {
 

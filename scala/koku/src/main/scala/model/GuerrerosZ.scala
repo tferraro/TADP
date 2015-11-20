@@ -1,7 +1,6 @@
 package model
 
 import model.Movimientos._
-import model.Especies._
 
 object GuerrerosZ {
 
@@ -16,6 +15,7 @@ object GuerrerosZ {
 
     require(energiaMaxima >= energia, "La energia no puede ser mayor a la máxima")
 
+    // TODO: hagan todos los objetos inmutables
     var kiExterno: Int = 0
     def recuperarEnergiaMaxima = {
       val guerreroRecuperado = copy(energia = energiaMaxima)
@@ -54,21 +54,28 @@ object GuerrerosZ {
     def actualizarEspecie(especie: Especie) = copy(especie = especie)
     def cambiarEstado(nuevo: EstadoGuerrero) = {
       (especie match {
+        // bien por el pattern
         case Fusion(original) if (nuevo == KO || nuevo == DEAD) => original
         case _ => this
       }).copy(estado = nuevo)
     }
 
-    def estaMorido: Boolean = estado.equals(DEAD)
+    // el equals de scala es el "==" (es igualdad y no identidad :)
+    def estaMorido = estado == DEAD
 
     def aumentarEMaxTantasVeces(veces: Int) = copy(energiaMaxima = energiaMaxima * veces)
     def aumentarEMax(cuantas: Int) = copy(energiaMaxima = energiaMaxima + cuantas)
+
+    // TODO: no entiendo bien el "ki externo"
     def cargaKiExterno: Guerrero = {
       val nuevo = copy()
       nuevo.kiExterno = kiExterno + 1
       return nuevo
     }
+    
+    // TODO: evitar una copia de nada! si el modelo fuera inmutable sería "this" (y no sería necesario el método...)
     def pasar = copy()
+    
     def agregarMovimiento(moves: Movimiento*) = copy(movimientos = movimientos ++ moves)
     def agregarMovimiento(moves: List[Movimiento]) = copy(movimientos = movimientos ++ moves)
     def agregarItems(item: Item*) = copy(items = items ++ item)
@@ -86,6 +93,8 @@ object GuerrerosZ {
         case _ => mov(this, enemigo)
       }
     }
+    
+    // El retorno debería ser un Option (el significado sería: encontrá el movimiento más efectivo, si hay alguno)
     def movimientoMasEfectivoContra(oponente: Guerrero)(criterio: Criterio): Movimiento = {
       val listaOrdenada = for {
         mov <- criterio.ordenarMovimientos(movimientos, this, oponente)
@@ -95,7 +104,8 @@ object GuerrerosZ {
     }
 
     def pelearUnRound(movimiento: Movimiento)(oponente: Guerrero) = {
-      val (atacador, atacado) = this.usarMovimiento(movimiento)(oponente)
+      // buen detalle usando paternmatching en el val
+      val (atacador, atacado) = usarMovimiento(movimiento)(oponente)
       atacado.contraAtacarA(atacador).swap
     }
 
@@ -104,17 +114,19 @@ object GuerrerosZ {
     }
 
     def planDeAtaqueContra(oponente: Guerrero, rounds: Int)(criterio: Criterio): PlanDeAtaque = {
-      var planDeAtaque: PlanDeAtaque = List()
+      // buena combinacion de funciones, queda un poquito complejo pero no mucho más que el propio problema
+      val planDeAtaque: PlanDeAtaque = List()
       List.range(0, rounds).foldLeft(planDeAtaque, (this, oponente))((semilla, _) => {
-        var (plan, (atacante, defensor)) = semilla
-        var movimientoAUsar = atacante.movimientoMasEfectivoContra(defensor)(criterio)
+        val (plan, (atacante, defensor)) = semilla
+        val movimientoAUsar = atacante.movimientoMasEfectivoContra(defensor)(criterio)
         (plan :+ movimientoAUsar, atacante.pelearUnRound(movimientoAUsar)(defensor))
       })
         ._1
     }
 
     def pelearContra(oponente: Guerrero)(planDeAtaque: PlanDeAtaque): ResultadoPelea = {
-      var resultadoPelea: ResultadoPelea = SiguenPeleando(this, oponente)
+      val resultadoPelea: ResultadoPelea = SiguenPeleando(this, oponente)
+      // bien por el fold
       planDeAtaque.foldLeft(resultadoPelea) { (resultadoAnterior, movimiento) =>
         resultadoAnterior.map(movimiento)
       }
@@ -124,26 +136,32 @@ object GuerrerosZ {
   type PlanDeAtaque = List[Movimiento]
 
   trait ResultadoPelea {
-    def map(f: ((Guerrero, Guerrero) => (Guerrero, Guerrero))): ResultadoPelea
+    def map(f: Movimiento): ResultadoPelea
     def checkType(r: ResultadoPelea): Boolean
   }
 
+  // si ganó no necesita a los dos, puede solo quedarse con el ganador
   case class HabemusGanador(peleadores: (Guerrero, Guerrero)) extends ResultadoPelea {
-    def map(f: ((Guerrero, Guerrero) => (Guerrero, Guerrero))): ResultadoPelea = this
+    def map(f: Movimiento): ResultadoPelea = this
+    // TODO: no entiendo el "copy(null)", eviten esto!
     def checkType(r: ResultadoPelea): Boolean = this.copy(null).equals(r)
   }
 
   case class SiguenPeleando(peleadores: (Guerrero, Guerrero)) extends ResultadoPelea {
-    def map(f: ((Guerrero, Guerrero) => (Guerrero, Guerrero))): ResultadoPelea = {
-      var resultado = f(peleadores._1, peleadores._2)
+    def map(f: Movimiento): ResultadoPelea = {
+      val resultado = f(peleadores._1, peleadores._2)
       if (resultado._1.estaMorido || resultado._2.estaMorido)
+        // aca contruyan el resultado ganador con el guerrero que ganó y el otro lo descartan
         HabemusGanador(resultado)
       else
         SiguenPeleando(resultado)
     }
+    // el checktype que usan para los tests ya no es necesario
     def checkType(r: ResultadoPelea): Boolean = this.copy(null).equals(r)
   }
 
+  // No es necesario que lo cambien, pero pueden pensar que pasaría si el estado es una monada que wrapea al guerrero
+  //  entonces el cambio del estado es un map o un flatMap sobre el estado (que adentro tiene al guerrero)
   trait EstadoGuerrero
   case object Tranca extends EstadoGuerrero
   case object KO extends EstadoGuerrero
@@ -161,6 +179,8 @@ object GuerrerosZ {
   case object Municion extends Item
 
   trait TipoArma {
+    // bien por la delegación en el arma, pero podrían haber heredado directamente el 
+    //   tipo "Arma" sin hacer esta composición (Arma no hace nada más que contenerlos y siempre es una relación 1 a 1)
     def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int] = None): Guerrero
   }
   case object ArmaRoma extends TipoArma {
@@ -178,6 +198,7 @@ object GuerrerosZ {
           case MonoGigante => guerrero.perderCola.disminuirEnergia(guerrero.energia - 1).cambiarEstado(KO)
           case _           => guerrero.perderCola.disminuirEnergia(guerrero.energia - 1)
         }
+        // TODO: usar option.get es desaconsejado en la mayoría de los casos, sería mejor pasarle los dos guerreros y que éste método decida
         case _ => guerrero.disminuirEnergia(kiAtacante.get / 100)
       }
     }

@@ -3,7 +3,7 @@ package testsBasicos
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import model.Movimientos._
-import model.Especies._
+import model._
 import model.GuerrerosZ._
 
 class TestsSobreRequerimientos {
@@ -20,10 +20,10 @@ class TestsSobreRequerimientos {
     val ataque6 = UsarItem(mp5)
     val ataque7 = Explotar
 
-    var koku: Guerrero = Guerrero("koku", Saiyan(), 30, 150).agregarItems(cuchi, mp5, Municion, Municion)
+    val koku: Guerrero = Guerrero("koku", Saiyan(), 30, 150).agregarItems(cuchi, mp5, Municion, Municion)
       .agregarMovimiento(ataque1, ataque2, ataque3, ataque4, ataque5, ataque6, ataque7)
-    var yamcha: Guerrero = Guerrero("yamcha", Humano, 30, 150)
-    var n18: Guerrero = Guerrero("n18", Androide, 30, 150)
+    val yamcha: Guerrero = Guerrero("yamcha", Humano, 30, 150)
+    val n18: Guerrero = Guerrero("n18", Androide, 30, 150)
 
     assertEquals(ataque1, koku.movimientoMasEfectivoContra(yamcha)(MayorDaño))
     assertEquals(ataque1, koku.movimientoMasEfectivoContra(yamcha)(DerribarEnemigo))
@@ -32,12 +32,12 @@ class TestsSobreRequerimientos {
     assertEquals(PasarTurno, koku.movimientoMasEfectivoContra(n18)(SacarPocoKi))
     assertEquals(ataque6, koku.movimientoMasEfectivoContra(yamcha)(MovimientoTacaño))
 
-    var cell: Guerrero = Guerrero("Cell v2", Monstruo(ComerALaCell), 40, 150).agregarMovimiento(ataque7)
-    var gohan: Guerrero = Guerrero("Son Gohan", Saiyan(), 80, 150)
+    val cell: Guerrero = Guerrero("Cell v2", Monstruo(ComerALaCell), 40, 150).agregarMovimiento(ataque7)
+    val gohan: Guerrero = Guerrero("Son Gohan", Saiyan(), 80, 150)
     assertEquals(PasarTurno, cell.movimientoMasEfectivoContra(gohan)(NoMorir))
 
-    var vegetaM: Guerrero = Guerrero("Majin Vegeta", Monstruo(ComerALaBuu), 40, 150).agregarMovimiento(ataque1, ataque7)
-    var majinBuu: Guerrero = Guerrero("Majin Buu", Monstruo(ComerALaBuu), 80, 150)
+    val vegetaM: Guerrero = Guerrero("Majin Vegeta", Monstruo(ComerALaBuu), 40, 150).agregarMovimiento(ataque1, ataque7)
+    val majinBuu: Guerrero = Guerrero("Majin Buu", Monstruo(ComerALaBuu), 80, 150)
     assertEquals(ataque1, vegetaM.movimientoMasEfectivoContra(majinBuu)(NoMorir))
   }
 
@@ -81,6 +81,9 @@ class TestsSobreRequerimientos {
     var elPlanDeGoku = koku.planDeAtaqueContra(piccolo, 10)(MayorDaño)
 
     var resultado = koku.pelearContra(piccolo)(elPlanDeGoku)
+    // TODO: cada vez que usan "null" en scala muere un gatito!
+    // pueden verificar que el resultado es igual a HabemusGanador(Guerrero("Piccolo", Namekusein, ...))
+    //   entonces están testeando cual sería el estado final del guerrero (primero hagan un test con los valores mal y copien lo que da a lo que esperan)
     assertEquals(true, resultado.checkType(HabemusGanador(null)))
   }
 
