@@ -74,17 +74,18 @@ class TestsSobreRequerimientos {
 
   @Test
   def proofOfConceptAPelearHuboGanador() {
-    var koku: Guerrero = Guerrero("koku", Saiyan(), 600, 600).agregarItems(SemillaDelHermitaño, SemillaDelHermitaño)
+    val koku: Guerrero = Guerrero("koku", Saiyan(), 600, 600).agregarItems(SemillaDelHermitaño, SemillaDelHermitaño)
       .agregarMovimiento(UsarItem(SemillaDelHermitaño), Onda(30), Onda(100), CargarKi, Genkidama, DejarseFajar, MuchosGolpesNinja)
-    var piccolo: Guerrero = Guerrero("Piccolo", Namekusein, 1, 500).agregarItems(EsferasDelDragon(7), SemillaDelHermitaño)
+    val piccolo: Guerrero = Guerrero("Piccolo", Namekusein, 1, 500).agregarItems(EsferasDelDragon(7), SemillaDelHermitaño)
       .agregarMovimiento(UsarItem(SemillaDelHermitaño), Onda(40), Onda(70), CargarKi, MuchosGolpesNinja, Explotar)
-    var elPlanDeGoku = koku.planDeAtaqueContra(piccolo, 10)(MayorDaño)
+    val elPlanDeGoku = koku.planDeAtaqueContra(piccolo, 10)(MayorDaño)
 
-    var resultado = koku.pelearContra(piccolo)(elPlanDeGoku)
-    // TODO: cada vez que usan "null" en scala muere un gatito!
-    // pueden verificar que el resultado es igual a HabemusGanador(Guerrero("Piccolo", Namekusein, ...))
-    //   entonces están testeando cual sería el estado final del guerrero (primero hagan un test con los valores mal y copien lo que da a lo que esperan)
-    assertEquals(true, resultado.checkType(HabemusGanador(null)))
+    val resultado = koku.pelearContra(piccolo)(elPlanDeGoku)
+    val kokuFinal = Guerrero("koku", Saiyan(), 570, 600, Tranca).agregarItems(SemillaDelHermitaño, SemillaDelHermitaño)
+      .agregarMovimiento(UsarItem(SemillaDelHermitaño), Onda(30), Onda(100), CargarKi, Genkidama, DejarseFajar, MuchosGolpesNinja)
+    val picoloFinal = Guerrero("Piccolo", Namekusein, 0, 500, DEAD).agregarItems(EsferasDelDragon(7), SemillaDelHermitaño)
+      .agregarMovimiento(UsarItem(SemillaDelHermitaño), Onda(40), Onda(70), CargarKi, MuchosGolpesNinja, Explotar)
+    assertEquals(HabemusGanador(kokuFinal, picoloFinal), resultado)
   }
 
   @Test
@@ -96,6 +97,11 @@ class TestsSobreRequerimientos {
     var elPlanDeGoku = koku.planDeAtaqueContra(piccolo, 1)(MayorDaño)
 
     var resultado = koku.pelearContra(piccolo)(elPlanDeGoku)
-    assertEquals(true, resultado.checkType(SiguenPeleando(null)))
+
+    val kokuFinal = Guerrero("koku", Saiyan(), 500, 600, Tranca).agregarItems(SemillaDelHermitaño, SemillaDelHermitaño)
+      .agregarMovimiento(UsarItem(SemillaDelHermitaño), Onda(30), Onda(100), CargarKi, Genkidama, DejarseFajar, MuchosGolpesNinja)
+    val picoloFinal = Guerrero("Piccolo", Namekusein, 300, 500, Tranca).agregarItems(EsferasDelDragon(7), SemillaDelHermitaño)
+      .agregarMovimiento(UsarItem(SemillaDelHermitaño), Onda(40), Onda(70), CargarKi, MuchosGolpesNinja, Explotar)
+    assertEquals(SiguenPeleando(kokuFinal, picoloFinal), resultado)
   }
 }

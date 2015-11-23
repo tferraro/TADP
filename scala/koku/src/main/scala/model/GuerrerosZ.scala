@@ -133,14 +133,11 @@ object GuerrerosZ {
 
   trait ResultadoPelea {
     def map(f: Movimiento): ResultadoPelea
-    def checkType(r: ResultadoPelea): Boolean
   }
 
   // si ganó no necesita a los dos, puede solo quedarse con el ganador
   case class HabemusGanador(peleadores: (Guerrero, Guerrero)) extends ResultadoPelea {
     def map(f: Movimiento): ResultadoPelea = this
-    // TODO: no entiendo el "copy(null)", eviten esto!
-    def checkType(r: ResultadoPelea): Boolean = this.copy(null).equals(r)
   }
 
   case class SiguenPeleando(peleadores: (Guerrero, Guerrero)) extends ResultadoPelea {
@@ -152,8 +149,6 @@ object GuerrerosZ {
       else
         SiguenPeleando(resultado)
     }
-    // el checktype que usan para los tests ya no es necesario
-    def checkType(r: ResultadoPelea): Boolean = this.copy(null).equals(r)
   }
 
   // No es necesario que lo cambien, pero pueden pensar que pasaría si el estado es una monada que wrapea al guerrero
