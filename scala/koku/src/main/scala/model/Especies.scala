@@ -2,7 +2,6 @@ package model
 
 import model.GuerrerosZ._
 
-// Los traits y clases pueden definirse como elemento de primer nivel (no necesitan estar incluidos dentro de un object)
 trait Especie {
   def aumentoDeKi = 100
 }
@@ -20,7 +19,6 @@ case object Humano extends Especie
 case class Monstruo(formaComer: FormaComer) extends Especie
 case class Fusion(original: Guerrero) extends Especie
 
-// bien por la jerarquía de formas de comer
 trait FormaComer {
   def puedeComerA(enemigo: Guerrero): Boolean = true
   def digerir(user: Guerrero, enemigo: Guerrero): Guerrero

@@ -11,12 +11,11 @@ object GuerrerosZ {
       energiaMaxima: Int,
       estado: EstadoGuerrero = Tranca,
       movimientos: List[Movimiento] = List(),
-      items: List[Item] = List()) {
+      items: List[Item] = List(),
+      kiExterno: Int = 0) {
 
     require(energiaMaxima >= energia, "La energia no puede ser mayor a la máxima")
 
-    // TODO: hagan todos los objetos inmutables
-    var kiExterno: Int = 0
     def recuperarEnergiaMaxima = {
       val guerreroRecuperado = copy(energia = energiaMaxima)
       guerreroRecuperado.estado match {
@@ -28,6 +27,14 @@ object GuerrerosZ {
     def perderCola = especie match {
       case Saiyan(_) => actualizarEspecie(Saiyan(false))
       case _         => this
+    }
+
+    def aumentoDeKi = {
+      val cant = estado match {
+        case SuperSaiyan(nivel) => 150 * nivel
+        case _                  => especie.aumentoDeKi
+      }
+      aumentarEnergia(cant)
     }
 
     def aumentarEnergia(cuanto: Int) = {
@@ -66,16 +73,8 @@ object GuerrerosZ {
     def aumentarEMaxTantasVeces(veces: Int) = copy(energiaMaxima = energiaMaxima * veces)
     def aumentarEMax(cuantas: Int) = copy(energiaMaxima = energiaMaxima + cuantas)
 
-    // TODO: no entiendo bien el "ki externo"
-    def cargaKiExterno: Guerrero = {
-      val nuevo = copy()
-      nuevo.kiExterno = kiExterno + 1
-      return nuevo
-    }
-    
-    // TODO: evitar una copia de nada! si el modelo fuera inmutable sería "this" (y no sería necesario el método...)
-    def pasar = copy()
-    
+    def cargaKiExterno: Guerrero = copy(kiExterno = kiExterno + 1)
+    def resetKiExterno: Guerrero = copy(kiExterno = 0)
     def agregarMovimiento(moves: Movimiento*) = copy(movimientos = movimientos ++ moves)
     def agregarMovimiento(moves: List[Movimiento]) = copy(movimientos = movimientos ++ moves)
     def agregarItems(item: Item*) = copy(items = items ++ item)
@@ -84,23 +83,20 @@ object GuerrerosZ {
     def tieneItem(item: Item): Boolean = items.contains(item)
 
     def usarMovimiento(mov: Movimiento)(enemigo: Guerrero) = {
-      estado match {
-        case DEAD => (this, enemigo)
-        case KO => mov match {
-          case UsarItem(item) if (item.equals(SemillaDelHermitaño)) => mov(this, enemigo)
-          case _ => (this, enemigo)
-        }
-        case _ => mov(this, enemigo)
+      (estado, mov) match {
+        case (DEAD, _)                           => (this, enemigo)
+        case (KO, UsarItem(SemillaDelHermitaño)) => mov(this, enemigo)
+        case (KO, _)                             => (this, enemigo)
+        case (_, DejarseFajar | Genkidama)       => mov(this, enemigo)
+        case (_, _)                              => mov(this.resetKiExterno, enemigo)
       }
     }
-    
+
     // El retorno debería ser un Option (el significado sería: encontrá el movimiento más efectivo, si hay alguno)
     def movimientoMasEfectivoContra(oponente: Guerrero)(criterio: Criterio): Movimiento = {
-      val listaOrdenada = for {
-        mov <- criterio.ordenarMovimientos(movimientos, this, oponente)
-        if (criterio.evaluar(mov, this, oponente) > 0)
-      } yield mov
-      listaOrdenada.headOption.getOrElse(PasarTurno)
+      criterio
+        .ordenarMovimientos(movimientos, this, oponente)
+        .headOption.getOrElse(PasarTurno)
     }
 
     def pelearUnRound(movimiento: Movimiento)(oponente: Guerrero) = {

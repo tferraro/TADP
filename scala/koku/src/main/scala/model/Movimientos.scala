@@ -8,53 +8,42 @@ object Movimientos {
   // Por lo general el FunctionX se expresa con su forma con "=>" (es más entendible)
   type Movimiento = (Guerrero, Guerrero) => (Guerrero, Guerrero)
 
-//  case object PasarTurno extends Movimiento {
-//    def apply(user: Guerrero, enemigo: Guerrero) = {
-//      (user.pasar, enemigo.pasar)
-//    }
-//  }
+  //  case object PasarTurno extends Movimiento {
+  //    def apply(user: Guerrero, enemigo: Guerrero) = {
+  //      (user.pasar, enemigo.pasar)
+  //    }
+  //  }
   // detalle de sintaxis, es más facil definir las funciones así:
-  val PasarTurno = (user: Guerrero, enemigo: Guerrero) => (user.pasar, enemigo.pasar)
+  val PasarTurno = (user: Guerrero, enemigo: Guerrero) => (user, enemigo)
 
-//  case object DejarseFajar extends Movimiento {
-//    def apply(user: Guerrero, enemigo: Guerrero) = {
-//      (user.cargaKiExterno, enemigo.pasar)
-//    }
-//  }
+  //  case object DejarseFajar extends Movimiento {
+  //    def apply(user: Guerrero, enemigo: Guerrero) = {
+  //      (user.cargaKiExterno, enemigo.pasar)
+  //    }
+  //  }
   // Si lo definimos como un def luego para usarlo como "Movimiento" vamos a tener que hacer "DejarseFajar(_, _)"
-  def DejarseFajarDEF(user: Guerrero, enemigo: Guerrero) = (user.cargaKiExterno, enemigo.pasar)
-  
+  def DejarseFajarDEF(user: Guerrero, enemigo: Guerrero) = (user.cargaKiExterno, enemigo)
+
   // No entiendo porqué carga ki externo cuando se deja fajar?
-  
+
   // Esto solo va como ejemplo de como usar un def como valor
   val DejarseFajar = DejarseFajarDEF(_, _)
 
-  case object CargarKi extends Movimiento {
-    // - muy bien por el pattern matching para estas condiciones raras
-    // - es mejor usar la delegación y no romper el encapsulamiento (user.aumentarKi => adentro hace el pattern matching y te da el nuevo guerrero)
-    def apply(user: Guerrero, enemigo: Guerrero) = {
-      val cant = user.estado match {
-        case SuperSaiyan(nivel) => 150 * nivel
-        case _                  => user.especie.aumentoDeKi 
-      }
-      (user.aumentarEnergia(cant), enemigo.pasar)
-    }
-  }
+  val CargarKi = (user: Guerrero, enemigo: Guerrero) => (user.aumentoDeKi, enemigo)
 
   case object TransformarSuperSaiyan extends Movimiento {
     def apply(user: Guerrero, enemigo: Guerrero) = {
-      // bien armado el pattern con una tupla
       val guerreroActualizado = (user.especie, user.energia, user.energiaMaxima) match {
         case (Saiyan(_), e, eMax) if e >= (eMax / 2) => {
           user.estado match {
-            case MonoGigante     => user.pasar
+            case MonoGigante     => user
             case ss: SuperSaiyan => user.cambiarEstado(ss.subirNivel).aumentarEMaxTantasVeces(5 * ss.nivel)
             case _               => user.cambiarEstado(SuperSaiyan()).aumentarEMaxTantasVeces(5)
           }
         }
-        case _ => user.pasar
+        case _ => user
       }
-      (guerreroActualizado, enemigo.pasar)
+      (guerreroActualizado, enemigo)
     }
   }
 
@@ -64,16 +53,16 @@ object Movimientos {
         item match {
           case Arma(tipo) => tipo match {
             case ArmaFuego if user.tieneItem(Municion) => (user.removerItem(Municion), tipo.infligirDaño(enemigo))
-            case ArmaRoma => (user.pasar, tipo.infligirDaño(enemigo))
-            case ArmaFilosa if !user.especie.equals(Androide) => (user.pasar, tipo.infligirDaño(enemigo, Some(user.energia)))
-            case _ => (user.pasar, enemigo.pasar)
+            case ArmaRoma => (user, tipo.infligirDaño(enemigo))
+            case ArmaFilosa if !user.especie.equals(Androide) => (user, tipo.infligirDaño(enemigo, Some(user.energia)))
+            case _ => (user, enemigo)
           }
           // muy bueno el encadenamiento de mensajes al guerrero
-          case SemillaDelHermitaño if !user.especie.equals(Androide) => (user.recuperarEnergiaMaxima.removerItem(item), enemigo.pasar)
-          case _ => (user.pasar, enemigo.pasar)
+          case SemillaDelHermitaño if !user.especie.equals(Androide) => (user.recuperarEnergiaMaxima.removerItem(item), enemigo)
+          case _ => (user, enemigo)
         }
       else
-        (user.pasar, enemigo.pasar)
+        (user, enemigo)
     }
   }
 
@@ -87,29 +76,23 @@ object Movimientos {
             .aumentarEMax(amigo.energiaMaxima)
             .aumentarEnergia(amigo.energia)
             .agregarMovimiento(amigo.movimientos)
-        case _ => user.pasar
+        case _ => user
       }
-      (fusionado, enemigo.pasar)
+      (fusionado, enemigo)
     }
   }
 
   case object TransformarMono extends Movimiento {
     def apply(user: Guerrero, enemigo: Guerrero) = {
-      val mono = user.especie match {
-        // hay una mejor forma de patternmatchear esto, recuerden que la estructura se puede matchear en muchos niveles a la vez (eso es lo que le da la flexibilidad)
-        // case Saiyan(cola) if cola &&
-        case Saiyan(true) if user.items.contains(FotoLuna) =>
-          user.estado match {
-            case SuperSaiyan(_) => user.pasar
-            case _ => {
-              // normalmente se usan "val" para estar seguros que todo lo que hacemos es inmutable salvo casos particulares que lo requieren explicitamente
-              val userEMaxAumentado = user.aumentarEMaxTantasVeces(3)
-              userEMaxAumentado.aumentarEnergia(userEMaxAumentado.energiaMaxima).cambiarEstado(MonoGigante)
-            }
-          }
-        case _ => user.pasar
+      val mono = (user.especie, user.estado) match {
+        case (_, SuperSaiyan(_)) => user
+        case (Saiyan(true), _) if user.items.contains(FotoLuna) => {
+          val userEMaxAumentado = user.aumentarEMaxTantasVeces(3)
+          userEMaxAumentado.aumentarEnergia(userEMaxAumentado.energiaMaxima).cambiarEstado(MonoGigante)
+        }
+        case (_, _) => user
       }
-      (mono, enemigo.pasar)
+      (mono, enemigo)
     }
   }
 
@@ -120,7 +103,7 @@ object Movimientos {
         case Monstruo(formaComer) if (user.energia > enemigo.energia) &&
           formaComer.puedeComerA(enemigo) =>
           (formaComer.digerir(user, enemigo), enemigo.cambiarEstado(DEAD))
-        case _ => (user.pasar, enemigo.pasar)
+        case _ => (user, enemigo)
       }
     }
   }
@@ -135,32 +118,26 @@ object Movimientos {
   }
 
   // bien por el type alias nuevo por más que sea el mismo que el movimiento (así es más claro :)
-  type HabilidadMagica = Function2[Guerrero, Guerrero, (Guerrero, Guerrero)]
+  type HabilidadMagica = (Guerrero, Guerrero) => (Guerrero, Guerrero)
+
   case object RevivirOponente extends HabilidadMagica {
     def apply(user: Guerrero, enemigo: Guerrero) = {
       val revivido = enemigo.estado match {
         case KO | DEAD => enemigo.cambiarEstado(Tranca)
-        case _         => enemigo.pasar
+        case _         => enemigo
       }
-      (user.pasar, revivido)
+      (user, revivido)
     }
   }
 
-  trait AtaqueFisico extends Movimiento {
-    // no entiendo porqué este método está en el padre y no en "Explotar"
-    def recibirExplosion(guerrero: Guerrero, cuanta: Int) = {
-      guerrero.especie match {
-        case Androide => guerrero.disminuirEnergia(cuanta * 3)
-        case _        => guerrero.disminuirEnergia(cuanta * 2)
-      }
-    }
-  }
+  trait AtaqueFisico extends Movimiento
+
   case object MuchosGolpesNinja extends AtaqueFisico {
     def apply(user: Guerrero, enemigo: Guerrero) = {
       (user.especie, enemigo.especie) match {
-        case (Humano, Androide)                        => (user.disminuirEnergia(10), enemigo.pasar)
-        case (_, _) if user.energia > enemigo.energia  => (user.pasar, enemigo.disminuirEnergia(20))
-        case (_, _) if user.energia < enemigo.energia  => (user.disminuirEnergia(20), enemigo.pasar)
+        case (Humano, Androide)                        => (user.disminuirEnergia(10), enemigo)
+        case (_, _) if user.energia > enemigo.energia  => (user, enemigo.disminuirEnergia(20))
+        case (_, _) if user.energia < enemigo.energia  => (user.disminuirEnergia(20), enemigo)
         //Si ambos tienen el mismo ki, ambos pierden 20
         // ok, buen detalle
         case (_, _) if user.energia == enemigo.energia => (user.disminuirEnergia(20), enemigo.disminuirEnergia(20))
@@ -178,7 +155,14 @@ object Movimientos {
             case _ => (user.disminuirEnergia(explosion), recibirExplosion(enemigo, explosion))
           }
         }
-        case _ => (user.pasar, enemigo.pasar)
+        case _ => (user, enemigo)
+      }
+    }
+
+    def recibirExplosion(guerrero: Guerrero, cuanta: Int) = {
+      guerrero.especie match {
+        case Androide => guerrero.disminuirEnergia(cuanta * 3)
+        case _        => guerrero.disminuirEnergia(cuanta * 2)
       }
     }
   }
@@ -199,7 +183,7 @@ object Movimientos {
       if (user.energia >= energia)
         (user.disminuirEnergia(energia), recibirEnergia(enemigo, energia))
       else
-        (user.pasar, enemigo.pasar)
+        (user, enemigo)
     }
   }
   case object Genkidama extends AtaqueEnergia {
@@ -212,19 +196,15 @@ object Movimientos {
     def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero): Int
 
     def ordenarMovimientos(lista: List[Movimiento], atacante: Guerrero, defensor: Guerrero) = {
-      // TODO: filtrar los resultados <= 0
-      lista.sortBy { evaluar(_, atacante, defensor) }(Ordering[Int].reverse)
+      lista
+        .filter { (evaluar(_, atacante, defensor) > 0) }
+        .sortBy { evaluar(_, atacante, defensor) }(Ordering[Int].reverse)
     }
   }
 
   object MayorDaño extends Criterio {
     def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
-      // con la resta sola ya debería ser suficiente (considerando el filtrado de arriba
-      val defensorDañado = movimiento(atacante, defensor)._2
-      if (defensorDañado.energia < defensor.energia)
-        defensor.energia - defensorDañado.energia
-      else
-        0 //Si lanzo Ondas a un androide, le subo la bateria.
+        defensor.energia - movimiento(atacante, defensor)._2.energia
     }
   }
 
