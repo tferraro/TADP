@@ -67,7 +67,6 @@ object GuerrerosZ {
       }).copy(estado = nuevo)
     }
 
-    // el equals de scala es el "==" (es igualdad y no identidad :)
     def estaMorido = estado == DEAD
 
     def aumentarEMaxTantasVeces(veces: Int) = copy(energiaMaxima = energiaMaxima * veces)
@@ -100,7 +99,6 @@ object GuerrerosZ {
     }
 
     def pelearUnRound(movimiento: Movimiento)(oponente: Guerrero) = {
-      // buen detalle usando paternmatching en el val
       val (atacador, atacado) = usarMovimiento(movimiento)(oponente)
       atacado.contraAtacarA(atacador).swap
     }
@@ -135,7 +133,6 @@ object GuerrerosZ {
     def map(f: Movimiento): ResultadoPelea
   }
 
-  // si ganó no necesita a los dos, puede solo quedarse con el ganador
   case class HabemusGanador(ganador: Guerrero) extends ResultadoPelea {
     def map(f: Movimiento): ResultadoPelea = this
   }
@@ -167,36 +164,33 @@ object GuerrerosZ {
   case object FotoLuna extends Item
   case class EsferasDelDragon(cuantas: Int) extends Item
   case object SemillaDelHermitaño extends Item
-  case class Arma(tipo: TipoArma) extends Item
   case object Municion extends Item
 
-  trait TipoArma {
-    // bien por la delegación en el arma, pero podrían haber heredado directamente el 
-    //   tipo "Arma" sin hacer esta composición (Arma no hace nada más que contenerlos y siempre es una relación 1 a 1)
-    def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int] = None): Guerrero
+  trait Arma extends Item {
+    def infligirDaño(guerrero: Guerrero, kiAtacante: Int): Guerrero
   }
-  case object ArmaRoma extends TipoArma {
-    def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int] = None) = {
+
+  case object ArmaRoma extends Arma {
+    def infligirDaño(guerrero: Guerrero, kiAtacante: Int = 0) = {
       if (!guerrero.especie.equals(Androide) && guerrero.energia < 300)
         guerrero.cambiarEstado(KO)
       else
         guerrero
     }
   }
-  case object ArmaFilosa extends TipoArma {
-    def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int]) = {
+  case object ArmaFilosa extends Arma {
+    def infligirDaño(guerrero: Guerrero, kiAtacante: Int) = {
       guerrero.especie match {
         case Saiyan(cola) if cola => guerrero.estado match {
           case MonoGigante => guerrero.perderCola.disminuirEnergia(guerrero.energia - 1).cambiarEstado(KO)
           case _           => guerrero.perderCola.disminuirEnergia(guerrero.energia - 1)
         }
-        // TODO: usar option.get es desaconsejado en la mayoría de los casos, sería mejor pasarle los dos guerreros y que éste método decida
-        case _ => guerrero.disminuirEnergia(kiAtacante.get / 100)
+        case _ => guerrero.disminuirEnergia(kiAtacante / 100)
       }
     }
   }
-  case object ArmaFuego extends TipoArma {
-    def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int] = None) = {
+  case object ArmaFuego extends Arma {
+    def infligirDaño(guerrero: Guerrero, kiAtacante: Int = 0) = {
       guerrero.especie match {
         case Humano                                   => guerrero.disminuirEnergia(20)
         case Namekusein if guerrero.estado.equals(KO) => guerrero.disminuirEnergia(10)

@@ -14,8 +14,8 @@ class TestsSobreRequerimientos {
     val ataque2 = Onda(10)
     val ataque3 = Onda(5)
     val ataque4 = CargarKi
-    val cuchi = Arma(ArmaFilosa)
-    val mp5 = Arma(ArmaFuego)
+    val cuchi = ArmaFilosa
+    val mp5 = ArmaFuego
     val ataque5 = UsarItem(cuchi)
     val ataque6 = UsarItem(mp5)
     val ataque7 = Explotar
@@ -55,12 +55,12 @@ class TestsSobreRequerimientos {
 
   @Test
   def proofOfConceptPlanDeAtaque() {
-    var yajirobe: Guerrero = Guerrero("yajirobe", Humano, 400, 400).agregarItems(Arma(ArmaFilosa), SemillaDelHermitaño)
-      .agregarMovimiento(UsarItem(Arma(ArmaFilosa)), UsarItem(SemillaDelHermitaño))
-    var vegeta: Guerrero = Guerrero("vegeta", Saiyan(), 200, 800).agregarItems(Arma(ArmaFuego), Municion)
-      .agregarMovimiento(Onda(30), UsarItem(Arma(ArmaFuego)))
+    var yajirobe: Guerrero = Guerrero("yajirobe", Humano, 400, 400).agregarItems(ArmaFilosa, SemillaDelHermitaño)
+      .agregarMovimiento(UsarItem(ArmaFilosa), UsarItem(SemillaDelHermitaño))
+    var vegeta: Guerrero = Guerrero("vegeta", Saiyan(), 200, 800).agregarItems(ArmaFuego, Municion)
+      .agregarMovimiento(Onda(30), UsarItem(ArmaFuego))
 
-    assertEquals(1, yajirobe.usarMovimiento(UsarItem(Arma(ArmaFilosa)))(vegeta)._2.energia)
+    assertEquals(1, yajirobe.usarMovimiento(UsarItem(ArmaFilosa))(vegeta)._2.energia)
     assertEquals(1, yajirobe.usarMovimiento(yajirobe.movimientoMasEfectivoContra(vegeta)(VentajaDeKi))(vegeta)._2.energia)
     assertEquals(340, vegeta.usarMovimiento(vegeta.movimientoMasEfectivoContra(yajirobe)(VentajaDeKi))(yajirobe)._2.energia)
     assertEquals(400, vegeta.usarMovimiento(vegeta.movimientoMasEfectivoContra(yajirobe)(VentajaDeKi))(yajirobe)
@@ -69,7 +69,7 @@ class TestsSobreRequerimientos {
     assertEquals(1, yajirobe.usarMovimiento(yajirobe.movimientoMasEfectivoContra(vegeta)(VentajaDeKi))(vegeta)._2.energia)
     assertEquals(380, yajirobe.pelearUnRound(yajirobe.movimientoMasEfectivoContra(vegeta)(VentajaDeKi))(vegeta)._1.energia)
 
-    assertEquals(List(UsarItem(Arma(ArmaFilosa)), UsarItem(SemillaDelHermitaño)), yajirobe.planDeAtaqueContra(vegeta, 2)(VentajaDeKi))
+    assertEquals(List(UsarItem(ArmaFilosa), UsarItem(SemillaDelHermitaño)), yajirobe.planDeAtaqueContra(vegeta, 2)(VentajaDeKi))
   }
 
   @Test

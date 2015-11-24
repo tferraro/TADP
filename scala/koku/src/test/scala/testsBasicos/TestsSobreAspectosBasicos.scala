@@ -203,93 +203,93 @@ class TestsSobreAspectosBasicos {
 
   @Test
   def proofOfConceptUsarItem() {
-    val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150).agregarItems(Arma(ArmaRoma))
+    val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150).agregarItems(ArmaRoma)
     val vegeta: Guerrero = Guerrero("vegeta", Saiyan(), 50, 150)
-    assertEquals(KO, koku.usarMovimiento(UsarItem(Arma(ArmaRoma)))(vegeta)._2.estado)
+    assertEquals(KO, koku.usarMovimiento(UsarItem(ArmaRoma))(vegeta)._2.estado)
   }
 
   @Test
   def proofOfConceptNoSeUsoItemPorNoTenerlo() {
     val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150)
     val vegeta: Guerrero = Guerrero("vegeta", Saiyan(), 50, 150)
-    assertEquals(Tranca, koku.usarMovimiento(UsarItem(Arma(ArmaRoma)))(vegeta)._2.estado)
+    assertEquals(Tranca, koku.usarMovimiento(UsarItem(ArmaRoma))(vegeta)._2.estado)
   }
 
   @Test
   def proofOfConceptArmaRomaNoHacePorAndroide() {
-    val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150).agregarItems(Arma(ArmaRoma))
+    val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150).agregarItems(ArmaRoma)
     val androide17: Guerrero = Guerrero("lapis", Androide, 30, 150)
-    assertEquals(Tranca, koku.usarMovimiento(UsarItem(Arma(ArmaRoma)))(androide17)._2.estado)
+    assertEquals(Tranca, koku.usarMovimiento(UsarItem(ArmaRoma))(androide17)._2.estado)
   }
 
   @Test
   def proofOfConceptArmaRomaNoHacePorFaltaDeKi() {
-    val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150).agregarItems(Arma(ArmaRoma))
+    val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150).agregarItems(ArmaRoma)
     val vegeta: Guerrero = Guerrero("vegeta", Saiyan(), 380, 450)
-    assertEquals(Tranca, koku.usarMovimiento(UsarItem(Arma(ArmaRoma)))(vegeta)._2.estado)
+    assertEquals(Tranca, koku.usarMovimiento(UsarItem(ArmaRoma))(vegeta)._2.estado)
   }
-  
+
   @Test
   def proofOfConceptArmaFilosaNoAtacaAndroide() {
-    val arale: Guerrero = Guerrero("arale", Androide, 30, 150).agregarItems(Arma(ArmaFilosa))
+    val arale: Guerrero = Guerrero("arale", Androide, 30, 150).agregarItems(ArmaFilosa)
     val vegeta: Guerrero = Guerrero("vegeta", Saiyan(true), 380, 450)
-    assertEquals(380, arale.usarMovimiento(UsarItem(Arma(ArmaFilosa)))(vegeta)._2.energia)
+    assertEquals(380, arale.usarMovimiento(UsarItem(ArmaFilosa))(vegeta)._2.energia)
   }
 
   @Test
   def proofOfConceptArmaFilosaASaiyanTranca() {
-    val trunks: Guerrero = Guerrero("trunks", Saiyan(), 380, 450).agregarItems(Arma(ArmaFilosa))
+    val trunks: Guerrero = Guerrero("trunks", Saiyan(), 380, 450).agregarItems(ArmaFilosa)
     val koku: Guerrero = Guerrero("vegeta", Saiyan(), 380, 450)
-    assertEquals(1, trunks.usarMovimiento(UsarItem(Arma(ArmaFilosa)))(koku)._2.energia)
-    assertEquals(Saiyan(false), trunks.usarMovimiento(UsarItem(Arma(ArmaFilosa)))(koku)._2.especie)
-    assertEquals(Tranca, trunks.usarMovimiento(UsarItem(Arma(ArmaFilosa)))(koku)._2.estado)
+    assertEquals(1, trunks.usarMovimiento(UsarItem(ArmaFilosa))(koku)._2.energia)
+    assertEquals(Saiyan(false), trunks.usarMovimiento(UsarItem(ArmaFilosa))(koku)._2.especie)
+    assertEquals(Tranca, trunks.usarMovimiento(UsarItem(ArmaFilosa))(koku)._2.estado)
   }
-   
-   @Test
+
+  @Test
   def proofOfConceptArmaFilosaAGuerrero() {
-    val trunks: Guerrero = Guerrero("trunks", Saiyan(), 380, 450).agregarItems(Arma(ArmaFilosa))
+    val trunks: Guerrero = Guerrero("trunks", Saiyan(), 380, 450).agregarItems(ArmaFilosa)
     val kaioshin: Guerrero = Guerrero("Kaioshin", Namekusein, 380, 450)
-    assertEquals(377, trunks.usarMovimiento(UsarItem(Arma(ArmaFilosa)))(kaioshin)._2.energia)
+    assertEquals(377, trunks.usarMovimiento(UsarItem(ArmaFilosa))(kaioshin)._2.energia)
   }
-  
+
   @Test
   def proofOfConceptArmaFilosaAMonoGigante() {
-    val yayirobe: Guerrero = Guerrero("Yayirobe", Humano, 380, 450).agregarItems(Arma(ArmaFilosa))
+    val yayirobe: Guerrero = Guerrero("Yayirobe", Humano, 380, 450).agregarItems(ArmaFilosa)
     val vegeta: Guerrero = Guerrero("vegeta", Saiyan(true), 380, 450).agregarItems(FotoLuna)
     val mono = vegeta.usarMovimiento(TransformarMono)(yayirobe)._1
-    assertEquals(1, yayirobe.usarMovimiento(UsarItem(Arma(ArmaFilosa)))(mono)._2.energia)
-    assertEquals(Saiyan(false), yayirobe.usarMovimiento(UsarItem(Arma(ArmaFilosa)))(mono)._2.especie)
-    assertEquals(KO, yayirobe.usarMovimiento(UsarItem(Arma(ArmaFilosa)))(mono)._2.estado)
+    assertEquals(1, yayirobe.usarMovimiento(UsarItem(ArmaFilosa))(mono)._2.energia)
+    assertEquals(Saiyan(false), yayirobe.usarMovimiento(UsarItem(ArmaFilosa))(mono)._2.especie)
+    assertEquals(KO, yayirobe.usarMovimiento(UsarItem(ArmaFilosa))(mono)._2.estado)
   }
 
   @Test
   def proofOfConceptArmaFuegoAHumanoSinMuniciones() {
-    val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150).agregarItems(Arma(ArmaFuego))
+    val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150).agregarItems(ArmaFuego)
     val mrSatan: Guerrero = Guerrero("Mr. Satan", Humano, 380, 450)
-    assertEquals(380, koku.usarMovimiento(UsarItem(Arma(ArmaFuego)))(mrSatan)._2.energia)
+    assertEquals(380, koku.usarMovimiento(UsarItem(ArmaFuego))(mrSatan)._2.energia)
   }
 
   @Test
   def proofOfConceptArmaFuegoAHumano() {
-    val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150).agregarItems(Arma(ArmaFuego)).agregarItems(Municion, Municion)
+    val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150).agregarItems(ArmaFuego).agregarItems(Municion, Municion)
     val mrSatan: Guerrero = Guerrero("Mr. Satan", Humano, 380, 450)
     assertEquals(360, koku
-      .usarMovimiento(UsarItem(Arma(ArmaFuego)))(mrSatan)
+      .usarMovimiento(UsarItem(ArmaFuego))(mrSatan)
       ._2.energia)
-    assertEquals(340, koku.usarMovimiento(UsarItem(Arma(ArmaFuego)))(koku.usarMovimiento(UsarItem(Arma(ArmaFuego)))(mrSatan)._2)
+    assertEquals(340, koku.usarMovimiento(UsarItem(ArmaFuego))(koku.usarMovimiento(UsarItem(ArmaFuego))(mrSatan)._2)
       ._2.energia)
-    val resultado = koku.usarMovimiento(UsarItem(Arma(ArmaFuego)))(mrSatan)
-    assertEquals(false, resultado._1.usarMovimiento(UsarItem(Arma(ArmaFuego)))(resultado._2)
+    val resultado = koku.usarMovimiento(UsarItem(ArmaFuego))(mrSatan)
+    assertEquals(false, resultado._1.usarMovimiento(UsarItem(ArmaFuego))(resultado._2)
       ._1.items.contains(Municion))
   }
 
   @Test
   def proofOfConceptArmaFuegoANamekMedioBoludo() {
-    val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150).agregarItems(Arma(ArmaFuego)).agregarItems(Municion, Municion)
+    val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150).agregarItems(ArmaFuego).agregarItems(Municion, Municion)
     val kaioshin: Guerrero = Guerrero("Kaioshin", Namekusein, 380, 450)
-    assertEquals(380, koku.usarMovimiento(UsarItem(Arma(ArmaFuego)))(kaioshin)._2.energia)
-    assertEquals(2, koku.usarMovimiento(UsarItem(Arma(ArmaFuego)))(kaioshin)._1.items.size)
-    assertEquals(370, koku.usarMovimiento(UsarItem(Arma(ArmaFuego)))(kaioshin.cambiarEstado(KO))._2.energia)
+    assertEquals(380, koku.usarMovimiento(UsarItem(ArmaFuego))(kaioshin)._2.energia)
+    assertEquals(2, koku.usarMovimiento(UsarItem(ArmaFuego))(kaioshin)._1.items.size)
+    assertEquals(370, koku.usarMovimiento(UsarItem(ArmaFuego))(kaioshin.cambiarEstado(KO))._2.energia)
   }
 
   @Test
@@ -298,23 +298,23 @@ class TestsSobreAspectosBasicos {
     val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150)
     assertEquals(450, kaioshin.usarMovimiento(UsarItem(SemillaDelHermitaño))(koku)._1.energia)
   }
-  
+
   @Test
   def proofOfConceptSemillaDelHermitañoGuerreroKO() {
-    val kaioshin: Guerrero = Guerrero("Kaioshin", Namekusein, 0, 450,KO).agregarItems(SemillaDelHermitaño)
+    val kaioshin: Guerrero = Guerrero("Kaioshin", Namekusein, 0, 450, KO).agregarItems(SemillaDelHermitaño)
     val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150)
     assertEquals(Tranca, kaioshin.usarMovimiento(UsarItem(SemillaDelHermitaño))(koku)._1.estado)
     assertEquals(450, kaioshin.usarMovimiento(UsarItem(SemillaDelHermitaño))(koku)._1.energia)
   }
-  
+
   @Test
   def proofOfConceptSemillaDelHermitañoGuerreroDEAD() {
-    val kaioshin: Guerrero = Guerrero("Kaioshin", Namekusein, 0, 450,DEAD).agregarItems(SemillaDelHermitaño)
+    val kaioshin: Guerrero = Guerrero("Kaioshin", Namekusein, 0, 450, DEAD).agregarItems(SemillaDelHermitaño)
     val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150)
     assertEquals(DEAD, kaioshin.usarMovimiento(UsarItem(SemillaDelHermitaño))(koku)._1.estado)
     assertEquals(0, kaioshin.usarMovimiento(UsarItem(SemillaDelHermitaño))(koku)._1.energia)
   }
-  
+
   @Test
   def proofOfConceptSemillaDelHermitañoSuperSaiyan() {
     val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150).agregarItems(SemillaDelHermitaño)
@@ -323,7 +323,7 @@ class TestsSobreAspectosBasicos {
     assertEquals(750, kokuss.usarMovimiento(UsarItem(SemillaDelHermitaño))(kaioshin)._1.energia)
     assertEquals(SuperSaiyan(1), kokuss.usarMovimiento(UsarItem(SemillaDelHermitaño))(kaioshin)._1.estado)
   }
-  
+
   @Test
   def proofOfConceptGolpesNinja() {
     val koku: Guerrero = Guerrero("koku", Saiyan(), 150, 150)

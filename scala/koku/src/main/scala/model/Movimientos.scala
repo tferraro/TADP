@@ -4,16 +4,8 @@ import model.GuerrerosZ._
 
 object Movimientos {
 
-  // type Movimiento = Function2[Guerrero, Guerrero, (Guerrero, Guerrero)]
-  // Por lo general el FunctionX se expresa con su forma con "=>" (es más entendible)
   type Movimiento = (Guerrero, Guerrero) => (Guerrero, Guerrero)
 
-  //  case object PasarTurno extends Movimiento {
-  //    def apply(user: Guerrero, enemigo: Guerrero) = {
-  //      (user.pasar, enemigo.pasar)
-  //    }
-  //  }
-  // detalle de sintaxis, es más facil definir las funciones así:
   val PasarTurno = (user: Guerrero, enemigo: Guerrero) => (user, enemigo)
 
   //  case object DejarseFajar extends Movimiento {
@@ -51,13 +43,9 @@ object Movimientos {
     def apply(user: Guerrero, enemigo: Guerrero) = {
       if (user.items.contains(item))
         item match {
-          case Arma(tipo) => tipo match {
-            case ArmaFuego if user.tieneItem(Municion) => (user.removerItem(Municion), tipo.infligirDaño(enemigo))
-            case ArmaRoma => (user, tipo.infligirDaño(enemigo))
-            case ArmaFilosa if !user.especie.equals(Androide) => (user, tipo.infligirDaño(enemigo, Some(user.energia)))
-            case _ => (user, enemigo)
-          }
-          // muy bueno el encadenamiento de mensajes al guerrero
+          case ArmaFuego if user.tieneItem(Municion) => (user.removerItem(Municion), ArmaFuego.infligirDaño(enemigo))
+          case ArmaRoma => (user, ArmaRoma.infligirDaño(enemigo))
+          case ArmaFilosa if !user.especie.equals(Androide) => (user, ArmaFilosa.infligirDaño(enemigo, user.energia))
           case SemillaDelHermitaño if !user.especie.equals(Androide) => (user.recuperarEnergiaMaxima.removerItem(item), enemigo)
           case _ => (user, enemigo)
         }
@@ -99,7 +87,6 @@ object Movimientos {
   case object ComerOponente extends Movimiento {
     def apply(user: Guerrero, enemigo: Guerrero) = {
       user.especie match {
-        // bien por el patternmatching
         case Monstruo(formaComer) if (user.energia > enemigo.energia) &&
           formaComer.puedeComerA(enemigo) =>
           (formaComer.digerir(user, enemigo), enemigo.cambiarEstado(DEAD))
@@ -117,7 +104,6 @@ object Movimientos {
     }
   }
 
-  // bien por el type alias nuevo por más que sea el mismo que el movimiento (así es más claro :)
   type HabilidadMagica = (Guerrero, Guerrero) => (Guerrero, Guerrero)
 
   case object RevivirOponente extends HabilidadMagica {
@@ -139,7 +125,6 @@ object Movimientos {
         case (_, _) if user.energia > enemigo.energia  => (user, enemigo.disminuirEnergia(20))
         case (_, _) if user.energia < enemigo.energia  => (user.disminuirEnergia(20), enemigo)
         //Si ambos tienen el mismo ki, ambos pierden 20
-        // ok, buen detalle
         case (_, _) if user.energia == enemigo.energia => (user.disminuirEnergia(20), enemigo.disminuirEnergia(20))
       }
     }
@@ -204,7 +189,7 @@ object Movimientos {
 
   object MayorDaño extends Criterio {
     def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
-        defensor.energia - movimiento(atacante, defensor)._2.energia
+      defensor.energia - movimiento(atacante, defensor)._2.energia
     }
   }
 
@@ -232,12 +217,7 @@ object Movimientos {
 
   object MovimientoTacaño extends Criterio {
     def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
-      // el checkeo contra 0 no es necesario si filtran
-      val atacanteAfectado = movimiento(atacante, defensor)._1
-      if (atacanteAfectado.items.size < atacante.items.size)
-        atacanteAfectado.items.size
-      else
-        0 //No perder items es como usar un movimiento que hace otra cosa menos usar items, no cumplo el Criterio.
+      atacante.items.size - movimiento(atacante, defensor)._1.items.size
     }
   }
 
