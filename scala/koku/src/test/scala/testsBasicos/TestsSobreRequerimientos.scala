@@ -83,9 +83,7 @@ class TestsSobreRequerimientos {
     val resultado = koku.pelearContra(piccolo)(elPlanDeGoku)
     val kokuFinal = Guerrero("koku", Saiyan(), 570, 600, Tranca).agregarItems(SemillaDelHermitaño, SemillaDelHermitaño)
       .agregarMovimiento(UsarItem(SemillaDelHermitaño), Onda(30), Onda(100), CargarKi, Genkidama, DejarseFajar, MuchosGolpesNinja)
-    val picoloFinal = Guerrero("Piccolo", Namekusein, 0, 500, DEAD).agregarItems(EsferasDelDragon(7), SemillaDelHermitaño)
-      .agregarMovimiento(UsarItem(SemillaDelHermitaño), Onda(40), Onda(70), CargarKi, MuchosGolpesNinja, Explotar)
-    assertEquals(HabemusGanador(kokuFinal, picoloFinal), resultado)
+    assertEquals(HabemusGanador(kokuFinal), resultado)
   }
 
   @Test

@@ -136,16 +136,17 @@ object GuerrerosZ {
   }
 
   // si ganó no necesita a los dos, puede solo quedarse con el ganador
-  case class HabemusGanador(peleadores: (Guerrero, Guerrero)) extends ResultadoPelea {
+  case class HabemusGanador(ganador: Guerrero) extends ResultadoPelea {
     def map(f: Movimiento): ResultadoPelea = this
   }
 
   case class SiguenPeleando(peleadores: (Guerrero, Guerrero)) extends ResultadoPelea {
     def map(f: Movimiento): ResultadoPelea = {
       val resultado = f(peleadores._1, peleadores._2)
-      if (resultado._1.estaMorido || resultado._2.estaMorido)
-        // aca contruyan el resultado ganador con el guerrero que ganó y el otro lo descartan
-        HabemusGanador(resultado)
+      if (resultado._1.estaMorido)
+        HabemusGanador(resultado._2)
+      else if (resultado._2.estaMorido)
+        HabemusGanador(resultado._1)
       else
         SiguenPeleando(resultado)
     }
