@@ -58,7 +58,8 @@ object Movimientos {
     def apply(user: Guerrero, enemigo: Guerrero) = {
       val fusionado = user.especie match {
         // bien el pattern con opciones, pero deberían chequear también por "user" (que sea de estas especies)
-        case Humano | Namekusein | Saiyan(_) =>
+        case Humano | Namekusein | Saiyan(_) if
+          List(Humano, Namekusein, Saiyan()).contains(amigo.especie) =>
           user
             .copy(nombre = user.nombre + "+" + amigo.nombre, especie = Fusion(user))
             .aumentarEMax(amigo.energiaMaxima)
