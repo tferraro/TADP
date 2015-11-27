@@ -1,7 +1,6 @@
 package model
 
 import model.Movimientos._
-import model.Especies._
 
 object GuerrerosZ {
 
@@ -12,11 +11,11 @@ object GuerrerosZ {
       energiaMaxima: Int,
       estado: EstadoGuerrero = Tranca,
       movimientos: List[Movimiento] = List(),
-      items: List[Item] = List()) {
+      items: List[Item] = List(),
+      kiExterno: Int = 0) {
 
     require(energiaMaxima >= energia, "La energia no puede ser mayor a la máxima")
 
-    var kiExterno: Int = 0
     def recuperarEnergiaMaxima = {
       val guerreroRecuperado = copy(energia = energiaMaxima)
       guerreroRecuperado.estado match {
@@ -28,6 +27,14 @@ object GuerrerosZ {
     def perderCola = especie match {
       case Saiyan(_) => actualizarEspecie(Saiyan(false))
       case _         => this
+    }
+
+    def aumentoDeKi = {
+      val cant = estado match {
+        case SuperSaiyan(nivel) => 150 * nivel
+        case _                  => especie.aumentoDeKi
+      }
+      aumentarEnergia(cant)
     }
 
     def aumentarEnergia(cuanto: Int) = {
@@ -54,21 +61,19 @@ object GuerrerosZ {
     def actualizarEspecie(especie: Especie) = copy(especie = especie)
     def cambiarEstado(nuevo: EstadoGuerrero) = {
       (especie match {
+        // bien por el pattern
         case Fusion(original) if (nuevo == KO || nuevo == DEAD) => original
         case _ => this
       }).copy(estado = nuevo)
     }
 
-    def estaMorido: Boolean = estado.equals(DEAD)
+    def estaMorido = estado == DEAD
 
     def aumentarEMaxTantasVeces(veces: Int) = copy(energiaMaxima = energiaMaxima * veces)
     def aumentarEMax(cuantas: Int) = copy(energiaMaxima = energiaMaxima + cuantas)
-    def cargaKiExterno: Guerrero = {
-      val nuevo = copy()
-      nuevo.kiExterno = kiExterno + 1
-      return nuevo
-    }
-    def pasar = copy()
+
+    def cargaKiExterno: Guerrero = copy(kiExterno = kiExterno + 1)
+    def resetKiExterno: Guerrero = copy(kiExterno = 0)
     def agregarMovimiento(moves: Movimiento*) = copy(movimientos = movimientos ++ moves)
     def agregarMovimiento(moves: List[Movimiento]) = copy(movimientos = movimientos ++ moves)
     def agregarItems(item: Item*) = copy(items = items ++ item)
@@ -77,25 +82,24 @@ object GuerrerosZ {
     def tieneItem(item: Item): Boolean = items.contains(item)
 
     def usarMovimiento(mov: Movimiento)(enemigo: Guerrero) = {
-      estado match {
-        case DEAD => (this, enemigo)
-        case KO => mov match {
-          case UsarItem(item) if (item.equals(SemillaDelHermitaño)) => mov(this, enemigo)
-          case _ => (this, enemigo)
-        }
-        case _ => mov(this, enemigo)
+      (estado, mov) match {
+        case (DEAD, _)                           => (this, enemigo)
+        case (KO, UsarItem(SemillaDelHermitaño)) => mov(this, enemigo)
+        case (KO, _)                             => (this, enemigo)
+        case (_, DejarseFajar | Genkidama)       => mov(this, enemigo)
+        case (_, _)                              => mov(this.resetKiExterno, enemigo)
       }
     }
+
+    // El retorno debería ser un Option (el significado sería: encontrá el movimiento más efectivo, si hay alguno)
     def movimientoMasEfectivoContra(oponente: Guerrero)(criterio: Criterio): Movimiento = {
-      val listaOrdenada = for {
-        mov <- criterio.ordenarMovimientos(movimientos, this, oponente)
-        if (criterio.evaluar(mov, this, oponente) > 0)
-      } yield mov
-      listaOrdenada.headOption.getOrElse(PasarTurno)
+      criterio
+        .ordenarMovimientos(movimientos, this, oponente)
+        .headOption.getOrElse(PasarTurno)
     }
 
     def pelearUnRound(movimiento: Movimiento)(oponente: Guerrero) = {
-      val (atacador, atacado) = this.usarMovimiento(movimiento)(oponente)
+      val (atacador, atacado) = usarMovimiento(movimiento)(oponente)
       atacado.contraAtacarA(atacador).swap
     }
 
@@ -104,17 +108,19 @@ object GuerrerosZ {
     }
 
     def planDeAtaqueContra(oponente: Guerrero, rounds: Int)(criterio: Criterio): PlanDeAtaque = {
-      var planDeAtaque: PlanDeAtaque = List()
+      // buena combinacion de funciones, queda un poquito complejo pero no mucho más que el propio problema
+      val planDeAtaque: PlanDeAtaque = List()
       List.range(0, rounds).foldLeft(planDeAtaque, (this, oponente))((semilla, _) => {
-        var (plan, (atacante, defensor)) = semilla
-        var movimientoAUsar = atacante.movimientoMasEfectivoContra(defensor)(criterio)
+        val (plan, (atacante, defensor)) = semilla
+        val movimientoAUsar = atacante.movimientoMasEfectivoContra(defensor)(criterio)
         (plan :+ movimientoAUsar, atacante.pelearUnRound(movimientoAUsar)(defensor))
       })
         ._1
     }
 
     def pelearContra(oponente: Guerrero)(planDeAtaque: PlanDeAtaque): ResultadoPelea = {
-      var resultadoPelea: ResultadoPelea = SiguenPeleando(this, oponente)
+      val resultadoPelea: ResultadoPelea = SiguenPeleando(this, oponente)
+      // bien por el fold
       planDeAtaque.foldLeft(resultadoPelea) { (resultadoAnterior, movimiento) =>
         resultadoAnterior.map(movimiento)
       }
@@ -124,26 +130,27 @@ object GuerrerosZ {
   type PlanDeAtaque = List[Movimiento]
 
   trait ResultadoPelea {
-    def map(f: ((Guerrero, Guerrero) => (Guerrero, Guerrero))): ResultadoPelea
-    def checkType(r: ResultadoPelea): Boolean
+    def map(f: Movimiento): ResultadoPelea
   }
 
-  case class HabemusGanador(peleadores: (Guerrero, Guerrero)) extends ResultadoPelea {
-    def map(f: ((Guerrero, Guerrero) => (Guerrero, Guerrero))): ResultadoPelea = this
-    def checkType(r: ResultadoPelea): Boolean = this.copy(null).equals(r)
+  case class HabemusGanador(ganador: Guerrero) extends ResultadoPelea {
+    def map(f: Movimiento): ResultadoPelea = this
   }
 
   case class SiguenPeleando(peleadores: (Guerrero, Guerrero)) extends ResultadoPelea {
-    def map(f: ((Guerrero, Guerrero) => (Guerrero, Guerrero))): ResultadoPelea = {
-      var resultado = f(peleadores._1, peleadores._2)
-      if (resultado._1.estaMorido || resultado._2.estaMorido)
-        HabemusGanador(resultado)
+    def map(f: Movimiento): ResultadoPelea = {
+      val resultado = f(peleadores._1, peleadores._2)
+      if (resultado._1.estaMorido)
+        HabemusGanador(resultado._2)
+      else if (resultado._2.estaMorido)
+        HabemusGanador(resultado._1)
       else
         SiguenPeleando(resultado)
     }
-    def checkType(r: ResultadoPelea): Boolean = this.copy(null).equals(r)
   }
 
+  // No es necesario que lo cambien, pero pueden pensar que pasaría si el estado es una monada que wrapea al guerrero
+  //  entonces el cambio del estado es un map o un flatMap sobre el estado (que adentro tiene al guerrero)
   trait EstadoGuerrero
   case object Tranca extends EstadoGuerrero
   case object KO extends EstadoGuerrero
@@ -157,33 +164,33 @@ object GuerrerosZ {
   case object FotoLuna extends Item
   case class EsferasDelDragon(cuantas: Int) extends Item
   case object SemillaDelHermitaño extends Item
-  case class Arma(tipo: TipoArma) extends Item
   case object Municion extends Item
 
-  trait TipoArma {
-    def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int] = None): Guerrero
+  trait Arma extends Item {
+    def infligirDaño(guerrero: Guerrero, kiAtacante: Int): Guerrero
   }
-  case object ArmaRoma extends TipoArma {
-    def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int] = None) = {
+
+  case object ArmaRoma extends Arma {
+    def infligirDaño(guerrero: Guerrero, kiAtacante: Int = 0) = {
       if (!guerrero.especie.equals(Androide) && guerrero.energia < 300)
         guerrero.cambiarEstado(KO)
       else
         guerrero
     }
   }
-  case object ArmaFilosa extends TipoArma {
-    def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int]) = {
+  case object ArmaFilosa extends Arma {
+    def infligirDaño(guerrero: Guerrero, kiAtacante: Int) = {
       guerrero.especie match {
         case Saiyan(cola) if cola => guerrero.estado match {
           case MonoGigante => guerrero.perderCola.disminuirEnergia(guerrero.energia - 1).cambiarEstado(KO)
           case _           => guerrero.perderCola.disminuirEnergia(guerrero.energia - 1)
         }
-        case _ => guerrero.disminuirEnergia(kiAtacante.get / 100)
+        case _ => guerrero.disminuirEnergia(kiAtacante / 100)
       }
     }
   }
-  case object ArmaFuego extends TipoArma {
-    def infligirDaño(guerrero: Guerrero, kiAtacante: Option[Int] = None) = {
+  case object ArmaFuego extends Arma {
+    def infligirDaño(guerrero: Guerrero, kiAtacante: Int = 0) = {
       guerrero.especie match {
         case Humano                                   => guerrero.disminuirEnergia(20)
         case Namekusein if guerrero.estado.equals(KO) => guerrero.disminuirEnergia(10)
