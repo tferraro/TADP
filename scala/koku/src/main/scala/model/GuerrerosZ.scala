@@ -92,10 +92,11 @@ object GuerrerosZ {
     }
 
     // El retorno debería ser un Option (el significado sería: encontrá el movimiento más efectivo, si hay alguno)
-    def movimientoMasEfectivoContra(oponente: Guerrero)(criterio: Criterio): Movimiento = {
+    // Creo que ahora si...
+    def movimientoMasEfectivoContra(oponente: Guerrero)(criterio: Criterio): Option[Movimiento] = {
       criterio
         .ordenarMovimientos(movimientos, this, oponente)
-        .headOption.getOrElse(PasarTurno)
+        .headOption
     }
 
     def pelearUnRound(movimiento: Movimiento)(oponente: Guerrero) = {
@@ -104,7 +105,7 @@ object GuerrerosZ {
     }
 
     def contraAtacarA(agresor: Guerrero): (Guerrero, Guerrero) = {
-      this.usarMovimiento(movimientoMasEfectivoContra(agresor)(VentajaDeKi))(agresor: Guerrero)
+      this.usarMovimiento(movimientoMasEfectivoContra(agresor)(VentajaDeKi).getOrElse(PasarTurno))(agresor: Guerrero)
     }
 
     def planDeAtaqueContra(oponente: Guerrero, rounds: Int)(criterio: Criterio): PlanDeAtaque = {
@@ -112,7 +113,7 @@ object GuerrerosZ {
       val planDeAtaque: PlanDeAtaque = List()
       List.range(0, rounds).foldLeft(planDeAtaque, (this, oponente))((semilla, _) => {
         val (plan, (atacante, defensor)) = semilla
-        val movimientoAUsar = atacante.movimientoMasEfectivoContra(defensor)(criterio)
+        val movimientoAUsar = atacante.movimientoMasEfectivoContra(defensor)(criterio).getOrElse(PasarTurno)
         (plan :+ movimientoAUsar, atacante.pelearUnRound(movimientoAUsar)(defensor))
       })
         ._1
@@ -151,6 +152,10 @@ object GuerrerosZ {
 
   // No es necesario que lo cambien, pero pueden pensar que pasaría si el estado es una monada que wrapea al guerrero
   //  entonces el cambio del estado es un map o un flatMap sobre el estado (que adentro tiene al guerrero)
+  //  Che, esto?
+  //  class Estado[Guerrero] { 
+  //    def blah...
+  
   trait EstadoGuerrero
   case object Tranca extends EstadoGuerrero
   case object KO extends EstadoGuerrero

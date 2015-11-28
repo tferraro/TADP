@@ -25,20 +25,20 @@ class TestsSobreRequerimientos {
     val yamcha: Guerrero = Guerrero("yamcha", Humano, 30, 150)
     val n18: Guerrero = Guerrero("n18", Androide, 30, 150)
 
-    assertEquals(ataque1, koku.movimientoMasEfectivoContra(yamcha)(MayorDaño))
-    assertEquals(ataque1, koku.movimientoMasEfectivoContra(yamcha)(DerribarEnemigo))
-    assertEquals(ataque3, koku.movimientoMasEfectivoContra(yamcha)(SacarPocoKi))
-    assertEquals(PasarTurno, koku.movimientoMasEfectivoContra(n18)(MayorDaño))
-    assertEquals(PasarTurno, koku.movimientoMasEfectivoContra(n18)(SacarPocoKi))
-    assertEquals(ataque6, koku.movimientoMasEfectivoContra(yamcha)(MovimientoTacaño))
+    assertEquals(ataque1, koku.movimientoMasEfectivoContra(yamcha)(MayorDaño).get)
+    assertEquals(ataque1, koku.movimientoMasEfectivoContra(yamcha)(DerribarEnemigo).get)
+    assertEquals(ataque3, koku.movimientoMasEfectivoContra(yamcha)(SacarPocoKi).get)
+    assertEquals(None, koku.movimientoMasEfectivoContra(n18)(MayorDaño))
+    assertEquals(None, koku.movimientoMasEfectivoContra(n18)(SacarPocoKi))
+    assertEquals(ataque6, koku.movimientoMasEfectivoContra(yamcha)(MovimientoTacaño).get)
 
     val cell: Guerrero = Guerrero("Cell v2", Monstruo(ComerALaCell), 40, 150).agregarMovimiento(ataque7)
     val gohan: Guerrero = Guerrero("Son Gohan", Saiyan(), 80, 150)
-    assertEquals(PasarTurno, cell.movimientoMasEfectivoContra(gohan)(NoMorir))
+    assertEquals(PasarTurno, cell.movimientoMasEfectivoContra(gohan)(NoMorir).getOrElse(PasarTurno))
 
     val vegetaM: Guerrero = Guerrero("Majin Vegeta", Monstruo(ComerALaBuu), 40, 150).agregarMovimiento(ataque1, ataque7)
     val majinBuu: Guerrero = Guerrero("Majin Buu", Monstruo(ComerALaBuu), 80, 150)
-    assertEquals(ataque1, vegetaM.movimientoMasEfectivoContra(majinBuu)(NoMorir))
+    assertEquals(ataque1, vegetaM.movimientoMasEfectivoContra(majinBuu)(NoMorir).getOrElse(PasarTurno))
   }
 
   @Test
@@ -48,7 +48,7 @@ class TestsSobreRequerimientos {
 
     assertEquals(350, vegeta.usarMovimiento(CargarKi)(koku)._1.energia)
     assertEquals(30, vegeta.usarMovimiento(Onda(80))(koku)._2.energia)
-    assertEquals(CargarKi, vegeta.movimientoMasEfectivoContra(koku)(VentajaDeKi))
+    assertEquals(CargarKi, vegeta.movimientoMasEfectivoContra(koku)(VentajaDeKi).getOrElse(PasarTurno))
     assertEquals(140, koku.pelearUnRound(Onda(50))(vegeta)._1.energia)
     assertEquals(250, koku.pelearUnRound(Onda(50))(vegeta)._2.energia)
   }
@@ -61,13 +61,13 @@ class TestsSobreRequerimientos {
       .agregarMovimiento(Onda(30), UsarItem(ArmaFuego))
 
     assertEquals(1, yajirobe.usarMovimiento(UsarItem(ArmaFilosa))(vegeta)._2.energia)
-    assertEquals(1, yajirobe.usarMovimiento(yajirobe.movimientoMasEfectivoContra(vegeta)(VentajaDeKi))(vegeta)._2.energia)
-    assertEquals(340, vegeta.usarMovimiento(vegeta.movimientoMasEfectivoContra(yajirobe)(VentajaDeKi))(yajirobe)._2.energia)
-    assertEquals(400, vegeta.usarMovimiento(vegeta.movimientoMasEfectivoContra(yajirobe)(VentajaDeKi))(yajirobe)
+    assertEquals(1, yajirobe.usarMovimiento(yajirobe.movimientoMasEfectivoContra(vegeta)(VentajaDeKi).getOrElse(PasarTurno))(vegeta)._2.energia)
+    assertEquals(340, vegeta.usarMovimiento(vegeta.movimientoMasEfectivoContra(yajirobe)(VentajaDeKi).getOrElse(PasarTurno))(yajirobe)._2.energia)
+    assertEquals(400, vegeta.usarMovimiento(vegeta.movimientoMasEfectivoContra(yajirobe)(VentajaDeKi).getOrElse(PasarTurno))(yajirobe)
       ._2.usarMovimiento(UsarItem(SemillaDelHermitaño))(vegeta)._1.energia)
 
-    assertEquals(1, yajirobe.usarMovimiento(yajirobe.movimientoMasEfectivoContra(vegeta)(VentajaDeKi))(vegeta)._2.energia)
-    assertEquals(380, yajirobe.pelearUnRound(yajirobe.movimientoMasEfectivoContra(vegeta)(VentajaDeKi))(vegeta)._1.energia)
+    assertEquals(1, yajirobe.usarMovimiento(yajirobe.movimientoMasEfectivoContra(vegeta)(VentajaDeKi).getOrElse(PasarTurno))(vegeta)._2.energia)
+    assertEquals(380, yajirobe.pelearUnRound(yajirobe.movimientoMasEfectivoContra(vegeta)(VentajaDeKi).getOrElse(PasarTurno))(vegeta)._1.energia)
 
     assertEquals(List(UsarItem(ArmaFilosa), UsarItem(SemillaDelHermitaño)), yajirobe.planDeAtaqueContra(vegeta, 2)(VentajaDeKi))
   }

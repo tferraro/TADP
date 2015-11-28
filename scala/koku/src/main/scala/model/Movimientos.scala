@@ -212,6 +212,7 @@ object Movimientos {
   object SacarPocoKi extends Criterio {
     def evaluar(movimiento: Movimiento, atacante: Guerrero, defensor: Guerrero) = {
       // como está ahora es casi igual a mayor daño, no debería ser sobre la energía del atacante? 
+      // Se refiere al movimiento que menos energia le saque al rival, por eso a mayor energia restante, mejor en su criterio.
       val defensorDañado = movimiento(atacante, defensor)._2
       if (defensorDañado.energia < defensor.energia)
         defensorDañado.energia //A lo sumo es 0, si lo matas.
