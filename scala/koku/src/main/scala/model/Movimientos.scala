@@ -56,10 +56,14 @@ object Movimientos {
 
   case class FusionCon(amigo: Guerrero) extends Movimiento {
     def apply(user: Guerrero, enemigo: Guerrero) = {
-      val fusionado = user.especie match {
-        // bien el pattern con opciones, pero deberían chequear también por "user" (que sea de estas especies)
-        case Humano | Namekusein | Saiyan(_) if
-          List(Humano, Namekusein, Saiyan()).contains(amigo.especie) =>
+      object FusionChecker {
+        val especies = List(Humano, Namekusein, Saiyan())
+        def tuplaTieneFusionEspecies(owner: Especie, enemigo: Especie): Boolean = {
+          especies.contains(owner) && especies.contains(enemigo)
+        }
+      }
+      val fusionado = (user.especie, amigo.especie) match {
+        case (owner, enemigo) if (FusionChecker.tuplaTieneFusionEspecies(owner, enemigo)) =>
           user
             .copy(nombre = user.nombre + "+" + amigo.nombre, especie = Fusion(user))
             .aumentarEMax(amigo.energiaMaxima)
